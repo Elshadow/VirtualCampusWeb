@@ -1,0 +1,21 @@
+<?npl
+--[[
+Title: all requests are directed to this page.
+Author: LiXizhi
+Date: 2016/6/7
+Desc: This file doesn't do anything, but loads wp_main.page with mini loader 
+]]
+
+-- we will not load complete framework, but only ajax and helper functions
+WP_USE_MINI_LOADER = true;
+
+include_once("script/apps/WebServer/admin/wp-main.page");
+
+-- here we display only wiki 
+-- include_once("script/apps/WebServer/admin/wp-content/pages/nopage.page");
+
+-- call the router  
+include_once("./wiki/routes.page");
+
+
+

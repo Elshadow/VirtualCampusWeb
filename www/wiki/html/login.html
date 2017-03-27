@@ -1,0 +1,31 @@
+<style>
+    #username::-moz-placeholder{color:white;}
+    #email::-moz-placeholder{color:white;}
+    #cellphone::-moz-placeholder{color:white;}
+    #password::-moz-placeholder{color:white;}
+
+    input[type=checkbox] {
+        -ms-transform: scale(1.5); /* IE */
+        -moz-transform: scale(1.5); /* FireFox */
+        -webkit-transform: scale(1.5); /* Safari and Chrome */
+        -o-transform: scale(1.5); /* Opera */
+    }
+</style>
+
+<div ng-controller="loginCtrl" >
+    <div style="position: relative">
+        <img src="/wiki/assets/imgs/loginBG.png" class="img-responsive">
+        <div style="position: absolute; top: 353px; left: 285px; color: white; font-size: 18px">
+            <div style="display: flex">
+                <div>
+                    <input id="email" type="input" ng-model="email" placeholder="账号" style="width: 405px; height: 65px; background: none; display: block;  border: 2px solid white; font-size: 18px">
+                    <input id="password" type="password" ng-model="password" placeholder="密码" style="width: 405px; height: 65px; background: none; display: block; margin-top: 27px; border: 2px solid white; font-size: 18px">
+                </div>
+                <div style="margin-left: 18px;">
+                    <input type="button" ng-click="login()" value="登录" style="width: 180px; height: 150px; background: none; font-size: 36px; color: white; border: 2px solid white">
+                </div>
+            </div>
+            <div style="color: red">{{errMsg}}</div>
+        </div>
+    </div>
+</div>

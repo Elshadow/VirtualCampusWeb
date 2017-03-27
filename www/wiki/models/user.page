@@ -1,0 +1,51 @@
+<?npl
+--[[
+Title: user profile
+Author: wuxiangan
+Date: 2016/10/21
+]]
+include_once("./abstract/base.page")
+
+local config = include("../auth/config.page");
+local user = inherit(models.abstract.base, gettable("models.user"))
+user.db_name = "user"
+
+function user:ctor()
+	self:addfield("username", "string", false, 30)
+	self:addfield("nickname", "string", false, 30)
+	self:addfield("signature", "string")
+	self:addfield("desc", "string", false)
+	self:addfield("email", "string", false, 30) -- private email, can be used to login
+	self:addfield("password", "string", false, 256) -- hashed password
+	self:addfield("cellphone", "string", false, 12) -- hashed password
+	self:addfield("sex", "string", false, 12)
+end
+
+-- 登录
+function user:api_login(params) 
+	
+	-- 获取配置文件中的账号密码
+	local config_name = config.name;
+	local config_pwd = config.password;
+	echo("config_name : "..config_name)
+	echo("config_pwd : "..config_pwd)
+
+	-- 判断请求参数是否非空
+	if (not params.name) or (not params.pwd) then
+		return {error=errors.REQUEST_PARAMS_ERROR, data=nil}	
+	end
+
+	-- 判断配置文件信息是否存在
+	if (not config_name) or (not config_pwd) then
+		return {error=errors.REQUEST_PARAMS_ERROR, data=nil}	
+	end
+
+	-- 校验用户名和密码
+	if (config_name == params.name) and (config_pwd == params.pwd) then
+		return {error=errors.SUCCESS, data={token=createJWT(params), userInfo=params}}
+	else
+		return errors:wrap("账号或者密码有误")
+	end
+
+end
+

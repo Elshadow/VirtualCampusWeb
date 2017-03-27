@@ -1,0 +1,8 @@
+<?npl
+--[[
+Title: user_info
+Author: HouC
+Date: 2017/3/27
+Desc: return user_info configuration
+]]
+return site_config()["default"].user_info;
