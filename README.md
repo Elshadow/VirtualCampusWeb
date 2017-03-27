@@ -1,4 +1,4 @@
-# Example Web Server
+# VirtualCampus Web Server
 
 ## How To Install 
 Install [NPLRuntime](https://github.com/LiXizhi/NPLRuntime/wiki), then
