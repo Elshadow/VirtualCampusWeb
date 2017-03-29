@@ -9,7 +9,8 @@
     <!-- plugin css -->
     <link href="/wiki/plugins/bootstrap/css/bootstrap.min.css" rel="stylesheet">
     <link href="/wiki/plugins/ui-select/select.css" rel="stylesheet" >
-	<link href="/wiki/plugins/cropper/cropper.min.css">
+    <link href="/wiki/plugins/cropper/cropper.min.css">
+	<link href="/wiki/plugins/leaflet/leaflet.css" rel="stylesheet">
 
     <!-- plugin js -->
     <script src="/wiki/plugins/jquery/jquery.min.js"></script>
@@ -23,6 +24,8 @@
     <script src="/wiki/plugins/github-api/GitHub.bundle.min.js"></script>
     <script src="/wiki/plugins/angular-sanitize/angular-sanitize.min.js"></script>
     <script src="/wiki/plugins/ui-select/select.js"></script>
+    <script src="/wiki/plugins/leaflet/leaflet-src.js"></script>
+    <!-- <script type="text/javascript" src="/wiki/plugins/index.js"></script> -->
     <!--script src="/wiki/plugins/requirejs/require.js"></script-->
 	<!-- 用户页显示需解析md --->
     <script src="/wiki/plugins/markdown-it/markdown-it.min.js"></script>
@@ -41,7 +44,8 @@
     <script src="/wiki/js/mainController.js"></script>
     <script src="/wiki/js/homeController.js"></script>
     <script src="/wiki/js/userController.js"></script>
-	<script src="/wiki/js/authController.js"></script>
+    <script src="/wiki/js/authController.js"></script>
+	<script src="/wiki/js/indexController.js"></script>
 </head>
 
 <body>
