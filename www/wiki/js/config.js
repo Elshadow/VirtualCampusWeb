@@ -11,6 +11,9 @@ app.config(function ($stateProvider, $urlRouterProvider) {
     }).state('home', {
         url:"/home",
         templateUrl:templatePath + 'home.html'
+    }).state('index', {
+        url:"/index",
+        templateUrl:templatePath + 'index.html'
     });
 });
 

@@ -3,7 +3,7 @@
  */
 
 app.controller('loginCtrl', function ($scope, $rootScope, $state, $auth, Account) {
-    //$scope.errMsg = "用户名或密码错误";
+    $scope.errMsg = "用户名或密码错误";
     $scope.login = function () {
         $scope.errMsg = "";
         var params = {
@@ -19,10 +19,13 @@ app.controller('loginCtrl', function ($scope, $rootScope, $state, $auth, Account
             Account.setUser(data.userInfo);
             console.log("登录成功");
             // 跳转地图页面
-			$state.go("home");
+			$state.go("index");
         }, function (error) {
             $scope.errMsg = error.message;
         });
     }
+   // $scope.login = function(){
+   //  location.href = '/#/index';
+   // }
 });
 

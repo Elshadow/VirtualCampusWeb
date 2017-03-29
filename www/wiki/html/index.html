@@ -1,0 +1,40 @@
+<style>
+    #map{
+        width:100% ;
+        height:800px ;
+    }
+    .cursor{
+        cursor:pointer;
+    }
+    .div-icon{
+        width:10px;
+        height:10px;
+        background: yellow !important;
+        border: 1px solid black;
+    }
+    .draw-btn{
+        width:100px;
+        height:25px;
+        line-height: 25px;
+        background: #fff;
+        text-align: center;
+        border:1px solid #ccc;
+        cursor: pointer !important;
+    }
+</style>
+
+<div ng-controller="indexCtrl" >
+    <header class="header">绘制高校地图范围</header>
+    <main class="main">
+        <div class="left-part">
+            <div class="search">
+                <span class="add-university cursor" ng-click="addUniversity()">+</span>
+                <input type="text" placeholder="学校名称" class="search-input">
+                <icon></icon>
+            </div>
+        </div>
+        <div class="right-part">
+            <div id="map"></div>
+        </div>
+    </main>
+</div>
