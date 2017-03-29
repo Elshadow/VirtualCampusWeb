@@ -17,7 +17,7 @@ app.controller('loginCtrl', function ($scope, $rootScope, $state, $auth, Account
         util.http("POST", config.apiUrlPrefix + 'user/login', params, function (data) {
             $auth.setToken(data.token);
             Account.setUser(data.userInfo);
-            console.log("登录成功");
+            console.log("登录成功,token = " + data.token);
             // 跳转地图页面
 			$state.go("home");
         }, function (error) {

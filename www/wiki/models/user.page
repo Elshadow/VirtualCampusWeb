@@ -27,13 +27,16 @@ function user:api_login(params)
 	-- 获取配置文件中的账号密码
 	local config_name = config.name;
 	local config_pwd = config.password;
-	echo("config_name : "..config_name)
-	echo("config_pwd : "..config_pwd)
+	print("config_name : "..config_name)
+	print("config_pwd : "..config_pwd)
 
 	-- 判断请求参数是否非空
 	if (not params.name) or (not params.pwd) then
 		return {error=errors.REQUEST_PARAMS_ERROR, data=nil}	
 	end
+
+	-- 默认设置用户_id为1,供生成token用
+	params["_id"] = 1;
 
 	-- 判断配置文件信息是否存在
 	if (not config_name) or (not config_pwd) then

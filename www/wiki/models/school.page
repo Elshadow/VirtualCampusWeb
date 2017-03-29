@@ -22,10 +22,6 @@ function school:ctor()
 	self:addfield("southEastLng", "string", false, 30)
 end
 
-function school:encodePassword(password)
-	return ParaMisc.md5(password or "")
-end
-
 function school:get(params) 
 	self:db():find({}, resume)
 	local err, data = yield()
@@ -70,135 +66,13 @@ function school:api_deleteById(params)
 	return errors:wrap() 
 end
 
--- 更新用户信息
+-- 更新学校信息
 function school:updateschoolInfo(schoolId, params)
 	self:db():updateOne({_id=schoolId}, params, resume)
 	local err, data = yield()
 end
 
--- 更改密码
-function school:api_changepw(params)
-	local schoolId = self:ensureAuthenticated()
-	if (not params.oldpassword) or (not params.newpassword) then
-		return errors:wrap(errors.REQUEST_PARAMS_ERROR)
-	end
-	
-	self:db():findOne({_id=schoolId}, resume)
-	local err, school = yield()
-	
-	if not school then 
-		return errors:wrap(errors.NOT_FOUND)
-	end
-	
-	local oldpassword = self:encodePassword(params.oldpassword)
-	local newpassword = self:encodePassword(params.newpassword)
-
-	if school.password ~= oldpassword then
-		return errors:wrap("密码错误")
-	end
-
-	school.password = newpassword
-
-	self:db():updateOne({_id=params._id}, school, resume)
-	return errors:wrap(yield())
-end
-
--- 发邮件
-function school:api_setemail(params)
-	if (not params._id) or (not params.email) then
-		return errors:wrap(errors.REQUEST_PARAMS_ERROR)
-	end
-	local email = params.email
-	if not email:match("^[%w%._%-]+@[%w%.%-]+%.[%a]+$") or #email>50 then
-		return errors:wrap(errors.REQUEST_PARAMS_ERROR)
-	end
-
-	self:db():updateOne({_id=params._id}, {email=email}, resume)
-	return errors:wrap(yield())
-end
-
--- 登录
-function school:api_login(params) 
-	if (not params.email) or (not params.password) then
-		return {error=errors.REQUEST_PARAMS_ERROR, data=nil}	
-	end
-
-	self:db():findOne({email=params.email}, resume)
-	local err, data = yield()
-	if not data then 
-		return errors:wrap(err or "用户不存在", data)
-	end
-
-	if data.password ~= self:encodePassword(params.password) then
-		return errors:wrap("密码错误")
-	end
-
-	return {error=errors.SUCCESS, data={token=createJWT(data), schoolInfo=data}}
-end
-	
--- 注册
-function school:api_register(params)
-	local err, params = self:validateQuery(params)
-	-- 用户名 密码 邮箱为必填项
-	if err or (not params.email) or (not params.schoolname) or (not params.password) then 
-		return errors:wrap(err)
-	end
-	
-	local websiteDB = models.website:new()
-	-- 查找用户名是否可用
-	if websiteDB:api_getByName({websiteName=params.schoolname}).data then
-		return errors:wrap(errors:new("用户名已存在"))
-	end
-	
-	-- 判断邮箱是否注册
-	self:db():findOne({email = params.email}, resume)
-	local err, data = yield()
-	
-	if data then 
-		return errors:wrap(errors:new("Email is already register"))
-	end
-	
-	-- 创建用户
-	self:db():insertOne(nil, {
-		schoolname = params.schoolname,
-		password = self:encodePassword(params.password),
-		email = params.email,
-		cellphone = params.cellphone,
-		joindate = ParaGlobal.GetDateFormat("yyyy-MM-dd"),
-		administrator = 0,
-		favoriteCount=0,
-		fansCount=0,
-		websiteCount=0,
-	}, resume)
-	local err, schoolInfo = yield()
-	if err then 
-		return errors:wrap(err,data)
-	end
-	
-	request.schoolid = schoolInfo._id
-
-	-- 创建个人站点
-	websiteDB:create({
-		name=params.schoolname,
-		schoolId=schoolInfo._id, 
-		schoolname=params.schoolname, 
-		desc="个人站点", 
-		categoryId=0, 
-		categoryName="个人站点",
-		favoriteCount=0,
-	})
-
-	return errors:wrap(nil, {token=createJWT(schoolInfo), schoolInfo=schoolInfo})
-end
-
--- 获取用户信息
-function school:api_getProfile()
-	local schoolId = self:ensureAuthenticated()
-	self:db():findOne({_id=schoolId}, resume)
-
-	return errors:wrap(yield())
-end
--- 通过用户ID获得用户信息
+-- 通过用户ID获得学校信息
 function school:api_getById(params)
 	if not params.schoolId then 
 		return errors:wrap(errors.REQUEST_PARAMS_ERROR)
@@ -213,40 +87,21 @@ function school:api_getById(params)
 	end
 
 	return errors:wrap(nil, data)
-	--[[
-		-- 精简信息
-		local schoolInfo = {
-			_id=data._id,
-			schoolname=data.schoolname,
-			email=data.email,
-			cellphone=data.cellphone,
-			sex=data.sex,
-			githubId=data.githubId,
-			githubToken=data.githubToken,
-			portrait=data.portrait,
-			comment=data.comment,
-			company=data.company,
-			location=data.location,
-			joindate=data.joindate,		
-		}
-		return {error=errors.SUCCESS, data=schoolInfo}
-
-	]]
 end
 
--- 获得用户数量
+-- 获得学校数量
 function school:api_getCount(params)
 	self:db():count({}, resume)
 	
 	return errors:wrap(yield())
 end
 
--- 获得收藏数排序的用户列表
+-- 获得id排序的学校列表
 function school:api_getFavoriteSortList(params)
 	local skip, limit = util:pagination(params)	
 	
 	local count = self:api_getCount().data
-	self:db():find({["-favoriteCount"]={gt=-1, skip=skip, limit=limit}}, resume)
+	self:db():find({["-_id"]={gt=-1, skip=skip, limit=limit}}, resume)
 	local err, data = yield()
 
 	if err then 
@@ -255,92 +110,3 @@ function school:api_getFavoriteSortList(params)
 	
 	return errors:wrap(nil, {total=count, pageCount=util:getPageCount(count,limit), schoolList=data})
 end
-
--- 获得用户信息和站点通过站点名
-function school:api_getschoolAndSiteBySitename(params)
-	if not params.sitename then
-		return errors:wrap(errors.REQUEST_PARAMS_ERROR)
-	end
-
-	local websiteDB = models.website:new()
-	local siteinfo = websiteDB:api_getByName({websiteName=params.sitename}).data
-	if not siteinfo then
-		return errors:wrap(errors.NOT_FOUND)
-	end
-	
-	local schoolinfo = self:api_getById({schoolId=siteinfo.schoolId}).data
-	if not schoolinfo then
-		return  errors:wrap(errros.NOT_FOUND)
-	end
-
-	return errors:wrap(nil, {schoolinfo=schoolinfo, siteinfo=siteinfo})
-end
-
--- 修改用户的站点数量
-function school:updateWebsiteCount(schoolId, count)
-	local school = self:api_getById({schoolId=schoolId}).data
-
-	if not school then
-		log("school not exist, schoolId:", schoolId)
-		return
-	end
-
-	school.websiteCount = school.websiteCount or 0	
-	self:db():updateOne({_id=schoolId}, {websiteCount=school.websiteCount+count}, resume)
-	yield()
-	
-	return 
-end
-
--- 修改用户的收藏数量
-function school:updateFavoriteCount(schoolId, count)
-	local school = self:api_getById({schoolId=schoolId}).data
-
-	if not school then
-		log("school not exist, schoolId:", schoolId)
-		return
-	end
-
-	school.favoriteCount = school.favoriteCount or 0
-	self:db():updateOne({_id=schoolId}, {favoriteCount=school.favoriteCount+count}, resume)
-	yield()
-	
-	return 
-end
-
--- 修改用户的粉丝数量
-function school:updateFansCount(schoolId, count)
-	local school = self:api_getById({schoolId=schoolId}).data
-
-	if not school then
-		log("school not exist, schoolId:", schoolId)
-		return
-	end
-	
-	school.fansCount = school.fansCount or 0		
-	self:db():updateOne({_id=schoolId}, {fansCount=school.fansCount+count}, resume)
-	yield()
-	
-	return 
-end
-
--- 获取用户统计信息
-function school:api_getStatics(params)
-	if not params.schoolId then
-		return errors:wrap(errors.REQUEST_PARAMS_ERROR)
-	end
-	
-	local websiteDB = models.website:new()
-	local schoolFavoriteDB = models.school_favorite:new()
-
-	local websiteCount = websiteDB:api_getCountByschoolId({schoolId=params.schoolId}).data
-	local favoriteCount = schoolFavoriteDB:api_getFavoriteWebsiteCountByschoolId({schoolId=params.schoolId}).data
-	local fansCount = schoolFavoriteDB:api_getFansCountByschoolId({schoolId=params.schoolId}).data
-
-	self:db():updateOne({_id=params.schoolId},{favoriteCount=favoriteCount, fansCount=fansCount, websiteCount=websiteCount}, resume)
-	local err, data = yield()
-
-	return errors:wrap(nil, {favoriteCount=favoriteCount, fansCount=fansCount, websiteCount=websiteCount})	
-end
-
-
