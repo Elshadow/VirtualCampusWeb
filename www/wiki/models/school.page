@@ -98,15 +98,15 @@ end
 
 -- 获得id排序的学校列表
 function school:api_getSchoolIdSortList(params)
-	local skip, limit = util:pagination(params)	
+	-- local skip, limit = util:pagination(params)	
 	
-	local count = self:api_getCount().data
-	self:db():find({["-_id"]={gt=-1, skip=skip, limit=limit}}, resume)
+	-- local count = self:api_getCount().data
+	self:db():find({}, resume)
 	local err, data = yield()
 
 	if err then 
 		return errors:wrap(err)
 	end
 	
-	return errors:wrap(nil, {total=count, pageCount=util:getPageCount(count,limit), schoolList=data})
+	return errors:wrap(nil, {schoolList=data})
 end
