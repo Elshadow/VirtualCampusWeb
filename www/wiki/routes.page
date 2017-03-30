@@ -20,8 +20,6 @@ local path = pagename() or "";
 WIKI_WEBROOT = WIKI_WEBROOT or "/wiki/";
 WIKI_ROOT = dirname(__FILE__);
 local ajax_type, ajax_path = path:match("^/?api/(%w+)/(.+)");
-if ajax_type then print("ajax_type : "..ajax_type) end;
-if ajax_path then print("ajax_path : "..ajax_path) end;
 
 if(ajax_type == "mod") then
 	include_once("./mod/routes.page");

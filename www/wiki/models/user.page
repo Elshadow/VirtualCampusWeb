@@ -52,8 +52,7 @@ end
 
 --获取用户信息
 function user:api_getProfile()
-       local userId = self:ensureAuthenticated()
-       self:db():findOne({_id=userId}, resume)
-
-       return errors:wrap(yield())
+	local userId = self:ensureAuthenticated()
+	self:db():findOne({_id=userId}, resume)
+	return errors:wrap(yield())
 end

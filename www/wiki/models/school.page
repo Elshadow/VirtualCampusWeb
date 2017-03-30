@@ -11,7 +11,7 @@ school.db_name = "school"
 
 
 function school:ctor()
-	self:addfield("schoolName", "string", false, 30)
+	self:addfield("schoolName", "string", true, 128)
 	self:addfield("northWestLat", "string", false, 30)
 	self:addfield("norhtWestLng", "string", false, 30)
 	self:addfield("northEastLat", "string", false, 30)
@@ -23,6 +23,7 @@ function school:ctor()
 end
 
 function school:get(params) 
+	self:ensureAuthenticated();
 	self:db():find({}, resume)
 	local err, data = yield()
 	
@@ -35,6 +36,7 @@ end
 
 -- 更新学校地理坐标信息
 function school:update(params) 
+	self:ensureAuthenticated();
 	local err, query = self:validateQuery(params)
 	if err or (not query._id) then 
 		return errors:wrap(errors.REQUEST_PARAMS_ERROR)
@@ -52,6 +54,7 @@ end
 
 -- 删除学校信息 
 function school:api_deleteById(params) 
+	self:ensureAuthenticated();
 	-- 只能删除自己
 	if not params.schoolId then
 		return errors:wrap(errors.REQUEST_PARAMS_ERROR)
@@ -67,13 +70,15 @@ function school:api_deleteById(params)
 end
 
 -- 更新学校信息
-function school:api_updateSchoolInfo(schoolId, params)
+function school:updateSchoolInfo(schoolId, params)
+	self:ensureAuthenticated();
 	self:db():updateOne({_id=schoolId}, params, resume)
 	local err, data = yield()
 end
 
 -- 通过用户ID获得学校信息
 function school:api_getById(params)
+	self:ensureAuthenticated();
 	if not params.schoolId then 
 		return errors:wrap(errors.REQUEST_PARAMS_ERROR)
 	end
@@ -98,15 +103,15 @@ end
 
 -- 获得id排序的学校列表
 function school:api_getSchoolIdSortList(params)
-	-- local skip, limit = util:pagination(params)	
+	local skip, limit = util:pagination(params)	
 	
-	-- local count = self:api_getCount().data
-	self:db():find({}, resume)
+	local count = self:api_getCount().data
+	self:db():find({["-_id"]={gt=-1, skip=skip, limit=limit}}, resume)
 	local err, data = yield()
 
 	if err then 
 		return errors:wrap(err)
 	end
 	
-	return errors:wrap(nil, {schoolList=data})
+	return errors:wrap(nil, {total=count, pageCount=util:getPageCount(count,limit), schoolList=data})
 end

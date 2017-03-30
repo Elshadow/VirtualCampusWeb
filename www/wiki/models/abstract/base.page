@@ -230,9 +230,24 @@ function base:create(params)
 	local err, query = self:validateQuery(params);
 	if(query) then
 		-- TODO: check uniqueness
-		self:db():insertOne(nil, query, resume);
-		local err, data = yield(true); 
-		return data;
+		local name = self:findUnqiueIndexName(query);
+		
+		if not name then
+			self:db():insertOne(nil, query, resume);
+			return errors:wrap(yield());
+		else
+			-- if name not nil then get record by name
+			self:db():findOne({[name] = query[name]}, resume);
+			local err, data = yield(true);
+			if ((not err) and data) then
+				return errors:wrap(errors.RECORD_EXIST)
+			elseif err then
+				return errors:wrap(errors.SERVER_INNER_ERROR)
+			else
+				self:db():insertOne(nil, query, resume);
+				return errors:wrap(yield());
+			end
+		end
 	end
 end
 

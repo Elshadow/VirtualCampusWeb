@@ -3,7 +3,11 @@
  */
 
 app.controller('loginCtrl', function ($scope, $rootScope, $state, $auth, Account) {
-    $scope.errMsg = "用户名或密码错误";
+    // 判断用户是否已经登录,如果已经登录自动跳转到地图页面
+    if (Account.isAuthenticated()) {
+        $state.go("index");
+    }
+    // $scope.errMsg = "用户名或密码错误";
     $scope.login = function () {
         $scope.errMsg = "";
         var params = {
@@ -17,7 +21,7 @@ app.controller('loginCtrl', function ($scope, $rootScope, $state, $auth, Account
         util.http("POST", config.apiUrlPrefix + 'user/login', params, function (data) {
             $auth.setToken(data.token);
             Account.setUser(data.userInfo);
-            console.log("登录成功,token = " + data.token);
+            // console.log("登录成功,token = " + data.token);
             // 跳转地图页面
 			$state.go("index");
         }, function (error) {
