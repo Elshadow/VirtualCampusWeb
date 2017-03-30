@@ -1,5 +1,23 @@
 app.controller('indexCtrl', function ($scope,$auth,Account) {
-    $(function(){
+    function getSchool(){
+        var params = {
+
+        }
+        util.http("get", config.apiUrlPrefix + 'school/getSchoolIdSortList', params, function (data) {
+            // $auth.setToken(data.token);
+            // Account.setUser(data.userInfo);
+
+            // console.log("登录成功");
+            // 跳转地图页面
+            // $state.go("index");
+            $scope.items = data.schoolList;
+            console.log($scope.items);
+
+        }, function (error) {
+            $scope.errMsg = error.message;
+        });
+    }
+    getSchool();
     var map = L.map('map');
     var china = [37.899050079360935, 102.83203125];
     map.setView(china,5);
@@ -138,21 +156,20 @@ app.controller('indexCtrl', function ($scope,$auth,Account) {
 
     //新增学校
     $scope.addUniversity = function(){
+        var str = $scope.uniName
         var params = {
-            userid:1,
-            schoolName:"深圳大学"
+            schoolName:str
         }
         util.http("put", config.apiUrlPrefix + 'school/new', params, function (data) {
-            $auth.setToken(data.token);
-            Account.setUser(data.userInfo);
+            // $auth.setToken(data.token);
+            // Account.setUser(data.userInfo);
 
-            console.log("登录成功");
+            // console.log("登录成功");
             // 跳转地图页面
             $state.go("index");
         }, function (error) {
             $scope.errMsg = error.message;
         });
     }
-})
 
 });
