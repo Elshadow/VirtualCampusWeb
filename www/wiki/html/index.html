@@ -119,6 +119,14 @@ body{
     .uni-list li{
         width: 100%;
         text-align: left;
+        height: 30px;
+        background: #eee;
+        margin-top: 3px;
+        line-height: 30px;
+        text-indent: 10px;
+    }
+    .uni-list li:hover{
+        background:#999;
     }
 </style>
 
@@ -132,7 +140,7 @@ body{
                 <icon></icon>
             </div>
             <ul class="uni-list">
-                <li ng-repeat="item in items">{{item.schoolName}}</li>
+                <li ng-repeat="item in items" ng-click="editUni($event)">{{item.schoolName}}</li>
             </ul>
         </div>
         <div class="right-part">

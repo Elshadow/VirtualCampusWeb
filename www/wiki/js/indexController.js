@@ -1,33 +1,19 @@
-app.controller('indexCtrl', function ($scope,$auth,Account) {
-    function getSchool(){
-        var params = {
-
-        }
-        util.http("get", config.apiUrlPrefix + 'school/getSchoolIdSortList', params, function (data) {
-            // $auth.setToken(data.token);
-            // Account.setUser(data.userInfo);
-
-            // console.log("登录成功");
-            // 跳转地图页面
-            // $state.go("index");
-            $scope.items = data.schoolList;
-            console.log($scope.items);
-
-        }, function (error) {
-            $scope.errMsg = error.message;
-        });
-    }
-    getSchool();
+app.controller('indexCtrl', function ($scope,$auth,Account,$state) {
+    // 判断用户是否已经登录,如果未登录自动跳转到登录页面
+    // if (Account.isAuthenticated()) {
+    //     $state.go("login");
+    // }
+    $scope.schoolName = "";
     var map = L.map('map');
     var china = [37.899050079360935, 102.83203125];
     map.setView(china,5);
     var myIcon = L.divIcon({className:"div-icon"});
-    var positionData = {
-        leftBottom:{lat:37.899050079360935,lng:102.83203125},
-        rightTop:{lat:38.00000,lng:102.933333}
-    }
+    // var positionData = {
+    //     leftBottom:{lat:37.899050079360935,lng:102.83203125},
+    //     rightTop:{lat:38.00000,lng:102.933333}
+    // }
     var marker,leftTop,leftBottom,rightTop,rightBottom;
-    var corner1,corner2,bounds,rec,ids={};
+    var corner1,corner2,bounds,rec,ids={},drawCtrl;
     var count = 1;
     L.tileLayer('http://{s}.tile.osm.org/{z}/{x}/{y}.png', {
           attribution: '&copy; <a href="http://osm.org/copyright">OpenStreetMap</a> contributors',
@@ -41,8 +27,6 @@ app.controller('indexCtrl', function ($scope,$auth,Account) {
             }else{
                 rec = L.rectangle(bound, {color: "#f00", weight: 1}).addTo(map);
             }
-            // setMarker();
-            marker.on('dragend',setMarker());
         }
         function createMarker(e){
             marker = L.marker(e.latlng,{icon:myIcon,draggable:true}).addTo(map);
@@ -64,10 +48,55 @@ app.controller('indexCtrl', function ($scope,$auth,Account) {
             _click:function(e){
                 e.stopPropagation();
                 if(count){
-                    map.on('click',setMarker);
+                    if(rec){
+                        var positionData = rec.getBounds();
+                        positionData.leftBottom = positionData._southWest;
+                        positionData.rightTop = positionData._northEast;
+                        leftTop = L.marker([positionData.rightTop.lat, positionData.leftBottom.lng], {icon: myIcon,draggable:true}).addTo(map);
+                        leftBottom = L.marker([positionData.leftBottom.lat,positionData.leftBottom.lng], {icon: myIcon,draggable:true}).addTo(map);
+                        rightTop = L.marker([positionData.rightTop.lat,positionData.rightTop.lng], {icon: myIcon,draggable:true}).addTo(map);
+                        rightBottom = L.marker([positionData.leftBottom.lat, positionData.rightTop.lng], {icon: myIcon,draggable:true}).addTo(map);
+                        ids = {
+                            leftTop:leftTop._leaflet_id,
+                            leftBottom:leftBottom._leaflet_id,
+                            rightTop:rightTop._leaflet_id,
+                            rightBottom:rightBottom._leaflet_id,
+
+                        }
+                        count = 0;
+                        leftTop.on('drag',move);
+                        leftBottom.on('drag',move);
+                        rightTop.on('drag',move);
+                        rightBottom.on('drag',move);
+
+                    }else{
+                        map.on('click',setMarker);
+                    }
+                    
                     e.target.innerText = '完成绘制';
                 }else {
                     e.target.innerText == '绘制';
+                    var latlng = rec.getBounds();
+                    console.log($scope.latlng);
+                    var params = {
+                        schoolName:$scope.schoolName,
+                        _id:$scope.id,
+                        northWestLat:latlng._northEast.lat,
+                        norhtWestLng:latlng._southWest.lng,
+                        northEastLat:latlng._northEast.lat,
+                        northEastLng:latlng._northEast.lng,
+                        southWestLat:latlng._southWest.lat,
+                        southWestLng:latlng._southWest.lng,
+                        southEastLat:latlng._southWest.lat,
+                        southEastLng:latlng._northEast.lng,
+                    }
+                    util.http("put", config.apiUrlPrefix + 'school', params, function (data) {
+                        console.log(data);
+                        location.reload();
+
+                    }, function (error) {
+                        $scope.errMsg = error.message;
+                    });
                     count = 1;
                 }
 
@@ -76,7 +105,7 @@ app.controller('indexCtrl', function ($scope,$auth,Account) {
         L.control.draw = function(options){
             return new L.Control.Draw(options);
         }
-        L.control.draw().addTo(map);
+        
     //移动时计算坐标
     function move(e){
         var position = rec.getBounds();
@@ -153,7 +182,25 @@ app.controller('indexCtrl', function ($scope,$auth,Account) {
         }
         console.log($auth.getToken());
         console.log(Account);
+        function getSchool(){
+                var params = {
 
+                }
+                util.http("get", config.apiUrlPrefix + 'school', params, function (data) {
+                    // $auth.setToken(data.token);
+                    // Account.setUser(data.userInfo);
+
+                    // console.log("登录成功");
+                    // 跳转地图页面
+                    // $state.go("index");
+                    $scope.items = data;
+                    console.log($scope.items);
+
+                }, function (error) {
+                    $scope.errMsg = error.message;
+                });
+            }
+            getSchool();
     //新增学校
     $scope.addUniversity = function(){
         var str = $scope.uniName
@@ -161,15 +208,40 @@ app.controller('indexCtrl', function ($scope,$auth,Account) {
             schoolName:str
         }
         util.http("put", config.apiUrlPrefix + 'school/new', params, function (data) {
-            // $auth.setToken(data.token);
-            // Account.setUser(data.userInfo);
-
-            // console.log("登录成功");
-            // 跳转地图页面
             $state.go("index");
         }, function (error) {
             $scope.errMsg = error.message;
         });
+    }
+    $scope.editUni = function(e){
+        for(var i = 0;i<e.target.parentNode.children.length;i++){
+            e.target.parentNode.children[i].style.background = "#eee";
+        }
+        e.target.style.background = "#999";
+        var latlng = JSON.parse(e.target.attributes.latlng.nodeValue);
+        $scope.id = latlng._id;
+        $scope.schoolName = latlng.schoolName;
+        if(latlng.norhtWestLng){
+            var c1 = L.latLng(latlng.southWestLat,latlng.southWestLng);
+            var c2 = L.latLng(latlng.northEastLat,latlng.northEastLng);
+            var bound = L.latLngBounds(c1, c2);
+            if(rec){
+                rec.setBounds(bound);
+            }else{
+                rec = L.rectangle(bound, {color: "#f00", weight: 1}).addTo(map);
+            }
+            map.fitBounds(bound);
+
+        }else{
+            if(rec){
+                rec.remove();
+                rec = '';
+            }
+        }
+        if(!drawCtrl){
+            drawCtrl = L.control.draw().addTo(map);
+        }
+        
     }
 
 });
