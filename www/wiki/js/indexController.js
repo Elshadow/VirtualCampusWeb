@@ -1,8 +1,8 @@
 app.controller('indexCtrl', function ($scope,$auth,Account,$state) {
     // 判断用户是否已经登录,如果未登录自动跳转到登录页面
-    // if (Account.isAuthenticated()) {
-    //     $state.go("login");
-    // }
+    if (!Account.isAuthenticated()) {
+        $state.go("login");
+    }
     $scope.schoolName = "";
     var map = L.map('map');
     var china = [37.899050079360935, 102.83203125];
