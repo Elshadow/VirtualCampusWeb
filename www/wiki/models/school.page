@@ -97,7 +97,7 @@ function school:api_getCount(params)
 end
 
 -- 获得id排序的学校列表
-function school:api_getFavoriteSortList(params)
+function school:api_getSchoolIdSortList(params)
 	local skip, limit = util:pagination(params)	
 	
 	local count = self:api_getCount().data
