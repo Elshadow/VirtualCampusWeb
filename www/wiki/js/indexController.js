@@ -3,6 +3,7 @@ app.controller('indexCtrl', function ($scope,$auth,Account,$state) {
     // if (Account.isAuthenticated()) {
     //     $state.go("login");
     // }
+    $scope.flag = false;
     $scope.schoolName = "";
     var map = L.map('map');
     var china = [37.899050079360935, 102.83203125];
@@ -72,7 +73,8 @@ app.controller('indexCtrl', function ($scope,$auth,Account,$state) {
                     }else{
                         map.on('click',setMarker);
                     }
-                    
+                    $scope.flag = true;
+                    $scope.$apply();
                     e.target.innerText = '完成绘制';
                 }else {
                     e.target.innerText == '绘制';
@@ -98,6 +100,8 @@ app.controller('indexCtrl', function ($scope,$auth,Account,$state) {
                         $scope.errMsg = error.message;
                     });
                     count = 1;
+                    $scope.flag = false;
+                    $scope.$apply();
                 }
 
             }
@@ -242,6 +246,17 @@ app.controller('indexCtrl', function ($scope,$auth,Account,$state) {
             drawCtrl = L.control.draw().addTo(map);
         }
         
+    }
+    $scope.searchInp = function(e){
+        if(e.which == 13){
+            searchSchool();
+        }
+    }
+    $scope.searchIcon = function(){
+        searchSchool();
+    }
+    function searchSchool(){
+
     }
 
 });

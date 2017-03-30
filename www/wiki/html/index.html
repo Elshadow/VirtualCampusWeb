@@ -59,6 +59,7 @@ body{
 }
 /*搜索框*/
 .search{
+    position: relative;
     /*width:90%;*/
 
 }
@@ -90,6 +91,7 @@ body{
     #map{
         width:100% ;
         height:100% ;
+        z-index:9999;
     }
     .cursor{
         cursor:pointer;
@@ -128,19 +130,38 @@ body{
     .uni-list li:hover{
         background:#999;
     }
+    .search-icon{
+        position: absolute;
+        right: 35px;
+        top: 3px;
+    }
+    .mask{
+        width:100%;
+        /*height:100%;*/
+        background:#000;
+        position: fixed;
+        left: 0px;
+        right: 0px;
+        top: 0px;
+        bottom: 0px;
+        z-index:1200;
+        opacity: 0.2;
+        /*display: none;*/
+    }
 </style>
 
 <div ng-controller="indexCtrl" >
+<div class="mask" ng-show="flag"></div>
     <header class="header">绘制高校地图范围</header>
     <main class="main">
         <div class="left-part">
             <div class="search">
                 <span class="add-university cursor" ng-click="addUniversity()">+</span>
-                <input ng-model="uniName" type="text" placeholder="学校名称" class="search-input"/>
-                <icon></icon>
+                <input ng-keydown="searchInp($event)" ng-model="uniName" type="text" placeholder="学校名称" class="search-input"/>
+                <img class="search-icon cursor" src="./wiki/assets/images/search.png" ng-click="searchIcon()" />
             </div>
             <ul class="uni-list">
-                <li ng-repeat="item in items" ng-click="editUni($event)">{{item.schoolName}}</li>
+                <li ng-repeat="item in items" latlng={{item}} ng-click="editUni($event)">{{item.schoolName}}</li>
             </ul>
         </div>
         <div class="right-part">
