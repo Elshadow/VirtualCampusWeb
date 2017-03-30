@@ -67,7 +67,7 @@ function school:api_deleteById(params)
 end
 
 -- 更新学校信息
-function school:updateschoolInfo(schoolId, params)
+function school:api_updateSchoolInfo(schoolId, params)
 	self:db():updateOne({_id=schoolId}, params, resume)
 	local err, data = yield()
 end
