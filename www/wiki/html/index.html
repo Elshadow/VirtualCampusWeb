@@ -203,7 +203,7 @@ body{
         <div class="left-part">
             <div class="search">
                 <span class="add-university cursor" ng-click="addUniversity()">+</span>
-                <input ng-keydown="searchInp($event)" ng-model="uniName" type="text" placeholder="学校名称" class="search-input"/>
+                <input ng-keydown="searchInp($event)" ng-model="uniName" type="text" placeholder="学校名称" class="search-input" ng-trim="true"/>
                 <img class="search-icon cursor" src="./wiki/assets/images/search.png" ng-click="searchIcon(uniName)" />
             </div>
             <ul class="uni-list">

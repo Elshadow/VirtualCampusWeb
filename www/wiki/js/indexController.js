@@ -228,10 +228,11 @@ app.controller('indexCtrl', function ($scope,$auth,Account,$state) {
     }
     //新增学校
     $scope.addUniversity = function(){
-        if($scope.uniName==""){
-            var str = $scope.uniName.replace(/\s+/g, "")
+        // console.log($scope.uniName)
+        if($scope.uniName != null && $scope.uniName != "" && typeof($scope.uniName) != "undefined"){
+            // var str = $scope.uniName.replace(/\s+/g, "")
             var params = {
-                schoolName:str
+                schoolName:$scope.uniName
             }
             util.http("put", config.apiUrlPrefix + 'school/new', params, function (data) {
                     location.reload();
@@ -298,18 +299,48 @@ app.controller('indexCtrl', function ($scope,$auth,Account,$state) {
         // searchSchool(data);
     }
     function searchSchool(data){
-        $scope.currentName = [];
-        $scope.all.map(function(item,i){
-            if(item.schoolName&&item.schoolName.indexOf(data)>=0){
-                $scope.currentName.push(item);
-                // console.log($scope.currentName);
-                
-            }
-        })
-        $scope.items = $scope.currentName;
-        console.log($scope.items)
-
+        if(data != null && data != "" && typeof(data) != "undefined"){
+            $scope.currentName = [];
+            $scope.all.map(function(item,i){
+                if(item.schoolName&&item.schoolName.indexOf(data)>=0){
+                    $scope.currentName.push(item);
+                    // console.log($scope.currentName);
+                    
+                }
+            })
+            $scope.items = $scope.currentName;
+            console.log($scope.items)
+        }else{
+            $scope.alert = true;
+            $scope.title = "学校名称不能为空";
+        }
+        
     }
 
+    function searchPosition(data){
+        var params = {
+            q: data,
+            format: "json",
+            polygon_geojson: 1,
+            addressdetails: 1,
+            countrycodes: "cn",
+            limit: 1
+        }
+        util.http("get", "http://nominatim.openstreetmap.org/search", params, function (data) {
+            // console.log(data[0].lat)
+            if (data && data.length > 0) {
+                var lat = data[0].lat;
+                var lon = data[0].lon;
+                var searchPos = [lat, lon];
+                map.setView(searchPos, 17);
+            }else{
+                $scope.alert = true;
+                $scope.title = "查询不到该地址";
+            }
+        }, function (error) {
+            $scope.alert = true;
+            $scope.title = "查询地址信息失败";
+        });
+    }
 
 });

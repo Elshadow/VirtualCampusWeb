@@ -128,11 +128,13 @@ util.http = function(method, url, params, callback, errorCallback) {
     httpRespone.then(function (response) {
         var data = response.data;
         console.log(data);
-        if (data.error.id == 0) {
+        if (data.error && data.error.id == 0) {
             //console.log(data.data);
             callback && callback(data.data);
             util.setParentIframeAutoHeight();
-        } else {
+        }else if (data.error == null && data != null) {
+            callback && callback(data);
+        }else {
             console.log(data);
             errorCallback && errorCallback(data.error);
         }
