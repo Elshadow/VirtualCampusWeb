@@ -1,12 +1,22 @@
 app.controller('indexCtrl', function ($scope,$auth,Account,$state) {
     // 判断用户是否已经登录,如果未登录自动跳转到登录页面
+    // if (Account.isAuthenticated()) {
+    //     $state.go("login");
+    // }
+    $scope.flag = false;
+    $scope.alert = false;
+    $scope.searchName=[];
+    $scope.currentName=[];
+    $scope.title = "";
     if (!Account.isAuthenticated()) {
         $state.go("login");
     }
     $scope.schoolName = "";
-    var map = L.map('map');
+    var map = L.map('map',{
+        zoomControl:false
+    });
     var china = [37.899050079360935, 102.83203125];
-    map.setView(china,5);
+    map.setView(china,4);
     var myIcon = L.divIcon({className:"div-icon"});
     // var positionData = {
     //     leftBottom:{lat:37.899050079360935,lng:102.83203125},
@@ -18,6 +28,10 @@ app.controller('indexCtrl', function ($scope,$auth,Account,$state) {
     L.tileLayer('http://{s}.tile.osm.org/{z}/{x}/{y}.png', {
           attribution: '&copy; <a href="http://osm.org/copyright">OpenStreetMap</a> contributors',
       }).addTo(map);
+    L.control.scale().addTo(map);
+    L.control.zoom({
+        position:"bottomright"
+    }).addTo(map);
         function drawRec(e){
             var c1 = L.latLng(e.latlng);
             var c2 = L.latLng(e.oldLatLng);
@@ -72,12 +86,13 @@ app.controller('indexCtrl', function ($scope,$auth,Account,$state) {
                     }else{
                         map.on('click',setMarker);
                     }
-                    
+                    $scope.flag = true;
+                    $scope.$apply();
                     e.target.innerText = '完成绘制';
                 }else {
                     e.target.innerText == '绘制';
                     var latlng = rec.getBounds();
-                    console.log($scope.latlng);
+                    // console.log($scope.latlng);
                     var params = {
                         schoolName:$scope.schoolName,
                         _id:$scope.id,
@@ -91,13 +106,15 @@ app.controller('indexCtrl', function ($scope,$auth,Account,$state) {
                         southEastLng:latlng._northEast.lng,
                     }
                     util.http("put", config.apiUrlPrefix + 'school', params, function (data) {
-                        console.log(data);
+                        // console.log(data);
                         location.reload();
 
                     }, function (error) {
                         $scope.errMsg = error.message;
                     });
                     count = 1;
+                    $scope.flag = false;
+                    $scope.$apply();
                 }
 
             }
@@ -110,23 +127,23 @@ app.controller('indexCtrl', function ($scope,$auth,Account,$state) {
     function move(e){
         var position = rec.getBounds();
         var data = {} ;
-        console.log(position);
+        // console.log(position);
         // console.log(e);
         if(e.target._leaflet_id == ids.leftTop){
-            console.log('左上')
+            // console.log('左上')
             data.rightTop = {lat:e.latlng.lat,lng:position._northEast.lng};
             data.leftBottom = {lat:position._southWest.lat,lng:e.latlng.lng};
         }else if(e.target._leaflet_id == ids.leftBottom){
-            console.log('左下')
+            // console.log('左下')
             data.leftBottom = e.latlng;
             data.rightTop = position._northEast;
         }else if(e.target._leaflet_id == ids.rightTop){
-            console.log('右上')
+            // console.log('右上')
             data.rightTop = {lat:e.latlng.lat,lng:e.latlng.lng};
             data.leftBottom = position._southWest;
 
         }else if(e.target._leaflet_id == ids.rightBottom){
-            console.log('右下')
+            // console.log('右下')
             data.rightTop = {lat:position._northEast.lat,lng:e.latlng.lng};
             data.leftBottom = {lat:e.latlng.lat,lng:position._southWest.lng};
 
@@ -180,8 +197,8 @@ app.controller('indexCtrl', function ($scope,$auth,Account,$state) {
             rec.setBounds(bounds);
 
         }
-        console.log($auth.getToken());
-        console.log(Account);
+        // console.log($auth.getToken());
+        // console.log(Account);
         function getSchool(){
                 var params = {
 
@@ -194,13 +211,21 @@ app.controller('indexCtrl', function ($scope,$auth,Account,$state) {
                     // 跳转地图页面
                     // $state.go("index");
                     $scope.items = data;
-                    console.log($scope.items);
+                    $scope.all = data;
+                    // $scope.all.map(function(item,index){
+                    //     $scope.searchName.push(data[index].schoolName);
+                    // })
+                    // console.log($scope.searchName);
 
                 }, function (error) {
                     $scope.errMsg = error.message;
                 });
             }
             getSchool();
+    $scope.hideAlert = function(){
+        $scope.alert = false;
+        // $scope.$apply();
+    }
     //新增学校
     $scope.addUniversity = function(){
         var str = $scope.uniName
@@ -208,9 +233,12 @@ app.controller('indexCtrl', function ($scope,$auth,Account,$state) {
             schoolName:str
         }
         util.http("put", config.apiUrlPrefix + 'school/new', params, function (data) {
-            $state.go("index");
+                location.reload();
         }, function (error) {
             $scope.errMsg = error.message;
+            $scope.alert = true;
+            $scope.title = error.message;
+            // $scope.$apply();
         });
     }
     $scope.editUni = function(e){
@@ -243,5 +271,39 @@ app.controller('indexCtrl', function ($scope,$auth,Account,$state) {
         }
         
     }
+    $scope.searchInp = function(e){
+        if(e.which == 13){
+            var data = e.target.value;
+            if(data == undefined || data == ""){
+                $scope.items = $scope.all;
+            }else{
+                searchSchool(data)
+            }
+                
+        }
+    }
+    $scope.searchIcon = function(data){
+        if(data == undefined || data == ""){
+            $scope.items = $scope.all;
+        }else{
+            searchSchool(data)
+        }
+        
+        // searchSchool(data);
+    }
+    function searchSchool(data){
+        $scope.currentName = [];
+        $scope.all.map(function(item,i){
+            if(item.schoolName&&item.schoolName.indexOf(data)>=0){
+                $scope.currentName.push(item);
+                // console.log($scope.currentName);
+                
+            }
+        })
+        $scope.items = $scope.currentName;
+        console.log($scope.items)
+
+    }
+
 
 });
