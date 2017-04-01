@@ -30,7 +30,7 @@ app.controller('headerCtrl', function ($scope, $state, $auth, Account, Message) 
     $scope.logout = function () {
         $auth.logout();
         $scope.isLogin = false;
-        window.location.href="/#/home";
+        window.location.href="/#/login";
     }
 
     $scope.$on("onUserProfile", function (event, user) {

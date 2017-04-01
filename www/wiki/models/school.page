@@ -34,6 +34,22 @@ function school:get(params)
 	return {error=errors.SUCCESS, data=data}
 end
 
+function school:api_getSchoolByName(params) 
+	if(params and params.name ~= nil and params.name ~= "") then
+		self:db():find({schoolName=params.name}, resume)
+	else
+		return {error=errors.REQUEST_PARAMS_ERROR, data=nil}
+	end;
+	
+	local err, data = yield()
+	
+	if err then
+		return errors:wrap(err, data)
+	end
+
+	return {error=errors.SUCCESS, data=data}
+end
+
 -- 更新学校地理坐标信息
 function school:update(params) 
 	self:ensureAuthenticated();
@@ -114,4 +130,12 @@ function school:api_getSchoolIdSortList(params)
 	end
 	
 	return errors:wrap(nil, {total=count, pageCount=util:getPageCount(count,limit), schoolList=data})
+end
+
+-- 获取候选地址列表信息
+function school:api_getLocationQueryResult(params)
+	-- System.os.GetUrl("https://www.openstreetmap.org/search?query=深圳大学&xhr=1", echo)
+	System.os.GetUrl({url = "https://www.openstreetmap.org/search?query=%E6%B7%B1%E5%9C%B3%E5%A4%A7%E5%AD%A6&xhr=1", form = {}}, function(err, msg, data)	log(data)	end);
+	
+	return {error=errors.SUCCESS, data={}}
 end
