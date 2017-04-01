@@ -228,18 +228,24 @@ app.controller('indexCtrl', function ($scope,$auth,Account,$state) {
     }
     //新增学校
     $scope.addUniversity = function(){
-        var str = $scope.uniName
-        var params = {
-            schoolName:str
-        }
-        util.http("put", config.apiUrlPrefix + 'school/new', params, function (data) {
-                location.reload();
-        }, function (error) {
-            $scope.errMsg = error.message;
+        if($scope.uniName==""){
+            var str = $scope.uniName.replace(/\s+/g, "")
+            var params = {
+                schoolName:str
+            }
+            util.http("put", config.apiUrlPrefix + 'school/new', params, function (data) {
+                    location.reload();
+            }, function (error) {
+                $scope.errMsg = error.message;
+                $scope.alert = true;
+                $scope.title = error.message;
+                // $scope.$apply();
+            });
+        }else{
             $scope.alert = true;
-            $scope.title = error.message;
-            // $scope.$apply();
-        });
+            $scope.title = "学校名称不能为空";
+        }
+        
     }
     $scope.editUni = function(e){
         for(var i = 0;i<e.target.parentNode.children.length;i++){
