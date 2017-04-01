@@ -34,6 +34,17 @@ function school:get(params)
 	return {error=errors.SUCCESS, data=data}
 end
 
+function school:api_getAllSchool()
+	self:db():find({}, resume)
+	local err, data = yield()
+	
+	if err then
+		return errors:wrap(err, data)
+	end
+
+	return {error=errors.SUCCESS, data=data}
+end
+
 function school:api_getSchoolByName(params) 
 	if(params and params.name ~= nil and params.name ~= "") then
 		self:db():find({schoolName=params.name}, resume)

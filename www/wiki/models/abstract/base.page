@@ -232,7 +232,7 @@ function base:create(params)
 		-- TODO: check uniqueness
 		local name = self:findUnqiueIndexName(query);
 		
-		if not name then
+		if ((not name) and (name ~= "")) then
 			self:db():insertOne(nil, query, resume);
 			return errors:wrap(yield());
 		else

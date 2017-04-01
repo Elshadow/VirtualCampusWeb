@@ -228,7 +228,7 @@ app.controller('indexCtrl', function ($scope,$auth,Account,$state) {
     }
     //新增学校
     $scope.addUniversity = function(){
-        var str = $scope.uniName
+        var str = $scope.uniName.replace(/\s+/g, "")
         var params = {
             schoolName:str
         }
