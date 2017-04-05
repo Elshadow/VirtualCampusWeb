@@ -16,7 +16,21 @@ app.controller('indexCtrl', function ($scope,$auth,Account,$state) {
         zoomControl:false
     });
     var china = [37.899050079360935, 102.83203125];
-    map.setView(china,4);
+    // map.setView(china,4);
+    var locate = map.locate();
+    locate.on('locationfound',locationfound);
+    locate.on('locationerror',locationerror);
+    function locationfound(e){
+        map.setView([e.latlng.lat,e.latlng.lng],15);
+    }
+    function locationerror(e){
+        $scope.alert = true;
+        $scope.title = "获取当前位置信息失败";
+        map.setView(china,4);
+    }
+    // map.locationfound = function(e){
+    //     console.log(e);
+    // }
     var myIcon = L.divIcon({className:"div-icon"});
     // var positionData = {
     //     leftBottom:{lat:37.899050079360935,lng:102.83203125},
