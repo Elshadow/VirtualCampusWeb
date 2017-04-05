@@ -8,6 +8,6 @@ git submodule init && git submodule update
 git submodule foreach git pull origin master
 
 # start webserver in folder and port
-npl -d root="www/" port="8099" bootstrapper="script/apps/WebServer/WebServer.lua" 
+npl -d root="www/" port="8098" bootstrapper="script/apps/WebServer/WebServer.lua" 
 
 cat log.txt
