@@ -56,8 +56,12 @@ app.controller('indexCtrl', function ($scope,$auth,Account,$state) {
                 var options = this.options;
                 var input = L.DomUtil.create('input','search-ctrl-inp');
                 input.placeholder = "请输入地点";
+                var button =L.DomUtil.create('img','search-ctrl-btn');
+                button.src = "./wiki/assets/images/search.png"
                 input.onkeydown = this._find;
+                button.onclick = this._search;
                 container.appendChild(input);
+                container.appendChild(button);
                 return container;
 
             },
@@ -68,6 +72,10 @@ app.controller('indexCtrl', function ($scope,$auth,Account,$state) {
                     searchPosition(data);
 
                 }
+            },
+            _search:function(e){
+                var data = document.getElementsByClassName('search-ctrl-inp')[0].value;
+                searchPosition(data);
             }
         })
         L.control.search = function(options){
