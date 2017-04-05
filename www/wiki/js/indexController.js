@@ -46,6 +46,34 @@ app.controller('indexCtrl', function ($scope,$auth,Account,$state) {
             marker = L.marker(e.latlng,{icon:myIcon,draggable:true}).addTo(map);
             marker.on("drag",drawRec);
         }
+        //创建搜索控件
+        L.Control.Search = L.Control.extend({
+            options:{
+                position:"topleft"
+            },
+            onAdd:function(map){
+                var container = L.DomUtil.create('div','search-ctrl');
+                var options = this.options;
+                var input = L.DomUtil.create('input','search-ctrl-inp');
+                input.placeholder = "请输入地点";
+                input.onkeydown = this._find;
+                container.appendChild(input);
+                return container;
+
+            },
+            _find:function(e){
+                if(e.which == 13){
+                    console.log(13);
+                    var data = e.target.value;
+                    searchPosition(data);
+
+                }
+            }
+        })
+        L.control.search = function(options){
+            return new L.Control.Search(options);
+        }
+        L.control.search().addTo(map);
         //创建绘制控件
         L.Control.Draw = L.Control.extend({
             options:{
