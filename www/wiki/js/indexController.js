@@ -8,6 +8,7 @@ app.controller('indexCtrl', function ($scope,$auth,Account,$state) {
     $scope.searchName=[];
     $scope.currentName=[];
     $scope.title = "";
+    $scope.delete = false;
     if (!Account.isAuthenticated()) {
         $state.go("login");
     }
@@ -157,14 +158,16 @@ app.controller('indexCtrl', function ($scope,$auth,Account,$state) {
                     }
                     util.http("put", config.apiUrlPrefix + 'school', params, function (data) {
                         // console.log(data);
-                        location.reload();
+                        location.reload(true);
+                        // $scope.flag = false;
+                        // $scope.$apply();
 
                     }, function (error) {
                         $scope.errMsg = error.message;
                     });
                     count = 1;
-                    $scope.flag = false;
-                    $scope.$apply();
+                   
+                    
                 }
 
             }
@@ -392,5 +395,35 @@ app.controller('indexCtrl', function ($scope,$auth,Account,$state) {
             $scope.title = "查询地址信息失败";
         });
     }
+    $scope.moveover = function(e){
+        console.log(e);
+        // e.stopPropagation();
+        e.target.children[0].style.display = 'inline';
 
+    }
+    $scope.moveout = function(e){
+        // e.stopPropagation();
+        e.target.children[0].style.display = 'none';
+    }
+    $scope.over = function(e){
+        // e.stopPropagation();
+        e.target.style.display = 'inline';
+    }
+    $scope.out = function(e){
+        e.target.style.display = 'none';
+    }
+    $scope.delete = function(e){
+        var id = JSON.parse(e.target.parentElement.attributes.latlng.nodeValue)._id;
+        var params = {
+            schoolId:id
+        }
+        util.http("put", config.apiUrlPrefix + 'school/deleteById', params, function (data) {
+                    location.reload();
+            }, function (error) {
+                $scope.errMsg = error.message;
+                $scope.alert = true;
+                $scope.title = error.message;
+                // $scope.$apply();
+            });
+    }
 });

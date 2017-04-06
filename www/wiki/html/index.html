@@ -206,6 +206,16 @@ body{
         top: 3px;
         cursor: pointer;
     }
+    .list-li{
+        position: relative;
+    }
+    .delete-btn{
+        display: none;
+        position: absolute;
+        /*margin-right:10px;*/
+        left:300px;
+        /*right:5px;*/
+    }
 </style>
 
 <div ng-controller="indexCtrl" >
@@ -224,7 +234,8 @@ body{
                 <img class="search-icon cursor" src="./wiki/assets/images/search.png" ng-click="searchIcon(uniName)" />
             </div>
             <ul class="uni-list">
-                <li ng-repeat="item in items" latlng={{item}} ng-click="editUni($event)">{{item.schoolName}}</li>
+                <li class="list-li" ng-repeat="item in items" ng-mouseout="moveout($event)" ng-mouseover="moveover($event)"
+                 latlng={{item}} ng-click="editUni($event)">{{item.schoolName}}<span ng-mouseout="out($event)" ng-click='delete($event)' ng-mouseover="over($event)" class="delete-btn cursor">X</span></li>
             </ul>
         </div>
         <div class="right-part">
