@@ -5,10 +5,12 @@ app.controller('indexCtrl', function ($scope,$auth,Account,$state) {
     // }
     $scope.flag = false;
     $scope.alert = false;
+    $scope.confirm = false;
     $scope.searchName=[];
     $scope.currentName=[];
     $scope.title = "";
-    $scope.delete = false;
+    $scope.confirmtitle = "";
+    // $scope.delete = false;
     if (!Account.isAuthenticated()) {
         $state.go("login");
     }
@@ -18,17 +20,7 @@ app.controller('indexCtrl', function ($scope,$auth,Account,$state) {
     });
     var china = [37.899050079360935, 102.83203125];
     // map.setView(china,4);
-    var locate = map.locate();
-    locate.on('locationfound',locationfound);
-    locate.on('locationerror',locationerror);
-    function locationfound(e){
-        map.setView([e.latlng.lat,e.latlng.lng],15);
-    }
-    function locationerror(e){
-        $scope.alert = true;
-        $scope.title = "获取当前位置信息失败";
-        map.setView(china,4);
-    }
+
     // map.locationfound = function(e){
     //     console.log(e);
     // }
@@ -147,7 +139,7 @@ app.controller('indexCtrl', function ($scope,$auth,Account,$state) {
                     $scope.$apply();
                     e.target.innerText = '完成绘制';
                 }else {
-                    e.target.innerText == '绘制';
+                    
                     var latlng = rec.getBounds();
                     // console.log($scope.latlng);
                     var params = {
@@ -164,8 +156,14 @@ app.controller('indexCtrl', function ($scope,$auth,Account,$state) {
                     }
                     util.http("put", config.apiUrlPrefix + 'school', params, function (data) {
                         // console.log(data);
-                        location.reload(true);
-                        // $scope.flag = false;
+                        // location.reload(true);
+                        getSchool();
+                        e.target.innerText = '绘制';
+                        $scope.flag = false;
+                        leftTop.remove();
+                        leftBottom.remove();
+                        rightTop.remove();
+                        rightBottom.remove();
                         // $scope.$apply();
 
                     }, function (error) {
@@ -331,6 +329,7 @@ app.controller('indexCtrl', function ($scope,$auth,Account,$state) {
                 rec.remove();
                 rec = '';
             }
+            searchPosition(latlng.schoolName);
         }
         if(!drawCtrl){
             drawCtrl = L.control.draw().addTo(map);
@@ -419,17 +418,39 @@ app.controller('indexCtrl', function ($scope,$auth,Account,$state) {
         e.target.style.display = 'none';
     }
     $scope.delete = function(e){
-        var id = JSON.parse(e.target.parentElement.attributes.latlng.nodeValue)._id;
-        var params = {
-            schoolId:id
-        }
-        util.http("put", config.apiUrlPrefix + 'school/deleteById', params, function (data) {
-                    location.reload();
-            }, function (error) {
-                $scope.errMsg = error.message;
-                $scope.alert = true;
-                $scope.title = error.message;
-                // $scope.$apply();
+        $scope.confirmtitle = "你确定删除?";
+        $scope.confirm = true;
+        $scope.deleteId = JSON.parse(e.target.parentElement.attributes.latlng.nodeValue)._id;
+    }
+    $scope.sureDelete = function(e){
+            // var id = JSON.parse(e.target.parentElement.attributes.latlng.nodeValue)._id;
+            var params = {
+                schoolId:$scope.deleteId
+
+            }
+            util.http("put", config.apiUrlPrefix + 'school/deleteById', params, function (data) {
+                        location.reload();
+                    }, function (error) {
+                        $scope.errMsg = error.message;
+                        $scope.alert = true;
+                        $scope.title = error.message;
+                        // $scope.$apply();
             });
+    }
+    $scope.hideConfirm = function(){
+        $scope.confirm = false;
+    }
+    var locate = map.locate({
+        timeout:0
+    });
+    locate.on('locationfound',locationfound);
+    locate.on('locationerror',locationerror);
+    function locationfound(e){
+        map.setView([e.latlng.lat,e.latlng.lng],15);
+    }
+    function locationerror(e){
+        $scope.alert = true;
+        $scope.title = "获取当前位置信息失败";
+        map.setView(china,4);
     }
 });

@@ -149,7 +149,7 @@ body{
         opacity: 0.2;
         /*display: none;*/
     }
-    .alert-mask{
+    .alert-mask,.confirm-mask{
         width:100%;
         /*height:100%;*/
         background:#000;
@@ -161,7 +161,7 @@ body{
         z-index:99999;
         opacity: 0.2;
     }
-    .alert-box{
+    .alert-box,.confirm-box{
         width: 400px;
         /* height: 300px; */
         position: fixed;
@@ -172,6 +172,7 @@ body{
         /* bottom: 0px; */
         z-index: 1000000;
         background: #fff;
+        text-align: center;
     }
     .alert-title{
         width: 100%;
@@ -179,7 +180,8 @@ body{
         margin-top: 30px;
         /* height: 100px; */
     }
-    .sure-btn{
+    .sure-btn,.sure-cancel{
+        display: inline-block;
         width: 80px;
         height: 30px;
         line-height: 30px;
@@ -189,6 +191,9 @@ body{
         margin: auto;
         margin-top: 30px;
         margin-bottom: 30px;
+    }
+    .sure-cancel{
+        margin-left:30px;
     }
     .search-ctrl{
         position: relative;
@@ -219,11 +224,17 @@ body{
 </style>
 
 <div ng-controller="indexCtrl" >
-<div class="mask" ng-show="flag"></div>
-<div class="alert-mask" ng-show="alert"></div>
+    <div class="mask" ng-show="flag"></div>
+    <div class="alert-mask" ng-show="alert"></div>
     <div class="alert-box" ng-show="alert">
         <div class="alert-title">{{title}}</div>
         <div class="sure-btn cursor" ng-click="hideAlert()">确定</div>
+    </div>
+    <div class="confirm-mask" ng-show="confirm"></div>
+    <div class="confirm-box" ng-show="confirm">
+        <div class="alert-title">{{confirmtitle}}</div>
+        <div class="sure-btn cursor" data-id="deleteId" ng-click="sureDelete()">确定</div>
+        <div class="sure-cancel cursor" ng-click="hideConfirm()">取消</div>
     </div>
     <header class="header">绘制高校地图范围</header>
     <main class="main">
