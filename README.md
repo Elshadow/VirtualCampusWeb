@@ -4,16 +4,16 @@
 Install [NPLRuntime](https://github.com/LiXizhi/NPLRuntime/wiki), then
 
 ```
-git clone https://github.com/NPLPackages/WebServerExample.git
+git clone git@github.com:Elshadow/VirtualCampusWeb.git
 ```
 
 Run `./start.sh` on linux, or `start.bat` on windows, 
 or run with following npl command directly.  
 ```
-npl -d root="www/" port="8099" bootstrapper="script/apps/WebServer/WebServer.lua"
+npl -d root="www/" port="8098" bootstrapper="script/apps/WebServer/WebServer.lua"
 ```
 
-To test it, open `http://localhost:8099`
+To test it, open `http://localhost:8098`
 
 Dependencies: 
   - [main package](https://github.com/NPLPackages/main), see git submodules for details
