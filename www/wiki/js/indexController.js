@@ -77,6 +77,9 @@ app.controller('indexCtrl', function ($scope,$auth,Account,$state) {
                 button.onclick = this._search;
                 container.appendChild(input);
                 container.appendChild(button);
+                if (L.DomEvent) {
+                    L.DomEvent.disableClickPropagation(container);
+                }
                 return container;
 
             },
@@ -107,6 +110,9 @@ app.controller('indexCtrl', function ($scope,$auth,Account,$state) {
                 var options = this.options;
                 container.innerText = "绘制";
                 container.onclick = this._click;
+                if (L.DomEvent) {
+                    L.DomEvent.disableClickPropagation(container);
+                }
                 return container;
 
             },
