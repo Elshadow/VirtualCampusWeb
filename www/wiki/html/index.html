@@ -245,7 +245,7 @@ body{
                 <img class="search-icon cursor" src="./wiki/assets/images/search.png" ng-click="searchIcon(uniName)" />
             </div>
             <ul class="uni-list">
-                <li class="list-li" ng-repeat="item in items" ng-mouseout="moveout($event)" ng-mouseover="moveover($event)"
+                <li on-finish-render-filters class="list-li" ng-repeat="item in items" ng-mouseout="moveout($event)" ng-mouseover="moveover($event)"
                  latlng={{item}} ng-click="editUni($event)">{{item.schoolName}}<span ng-mouseout="out($event)" ng-click='delete($event)' ng-mouseover="over($event)" class="delete-btn cursor">X</span></li>
             </ul>
         </div>

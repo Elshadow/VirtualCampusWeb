@@ -31,7 +31,7 @@ app.controller('indexCtrl', function ($scope,$auth,Account,$state) {
     // }
     var marker,leftTop,leftBottom,rightTop,rightBottom;
     var corner1,corner2,bounds,rec,ids={},drawCtrl;
-    var count = 1;
+    var count = 1,markerCount = 1;
     L.tileLayer('http://{s}.tile.osm.org/{z}/{x}/{y}.png', {
           attribution: '&copy; <a href="http://osm.org/copyright">OpenStreetMap</a> contributors',
       }).addTo(map);
@@ -126,7 +126,6 @@ app.controller('indexCtrl', function ($scope,$auth,Account,$state) {
                             rightBottom:rightBottom._leaflet_id,
 
                         }
-                        count = 0;
                         leftTop.on('drag',move);
                         leftBottom.on('drag',move);
                         rightTop.on('drag',move);
@@ -138,40 +137,42 @@ app.controller('indexCtrl', function ($scope,$auth,Account,$state) {
                     $scope.flag = true;
                     $scope.$apply();
                     e.target.innerText = '完成绘制';
+                    count = 0;
                 }else {
-                    
-                    var latlng = rec.getBounds();
-                    // console.log($scope.latlng);
-                    var params = {
-                        schoolName:$scope.schoolName,
-                        _id:$scope.id,
-                        northWestLat:latlng._northEast.lat,
-                        norhtWestLng:latlng._southWest.lng,
-                        northEastLat:latlng._northEast.lat,
-                        northEastLng:latlng._northEast.lng,
-                        southWestLat:latlng._southWest.lat,
-                        southWestLng:latlng._southWest.lng,
-                        southEastLat:latlng._southWest.lat,
-                        southEastLng:latlng._northEast.lng,
-                    }
-                    util.http("put", config.apiUrlPrefix + 'school', params, function (data) {
-                        // console.log(data);
-                        // location.reload(true);
-                        getSchool();
+                    if(rec){
+                        var latlng = rec.getBounds();
+                        // console.log($scope.latlng);
+                        var params = {
+                            schoolName:$scope.schoolName,
+                            _id:$scope.id,
+                            northWestLat:latlng._northEast.lat,
+                            norhtWestLng:latlng._southWest.lng,
+                            northEastLat:latlng._northEast.lat,
+                            northEastLng:latlng._northEast.lng,
+                            southWestLat:latlng._southWest.lat,
+                            southWestLng:latlng._southWest.lng,
+                            southEastLat:latlng._southWest.lat,
+                            southEastLng:latlng._northEast.lng,
+                        }
+                        util.http("put", config.apiUrlPrefix + 'school', params, function (data) {
+                            getSchool();
+                            e.target.innerText = '绘制';
+                            $scope.flag = false;
+                            leftTop.remove();
+                            leftBottom.remove();
+                            rightTop.remove();
+                            rightBottom.remove();
+
+                        }, function (error) {
+                            $scope.errMsg = error.message;
+                        });
+                    }else{
                         e.target.innerText = '绘制';
                         $scope.flag = false;
-                        leftTop.remove();
-                        leftBottom.remove();
-                        rightTop.remove();
-                        rightBottom.remove();
-                        // $scope.$apply();
-
-                    }, function (error) {
-                        $scope.errMsg = error.message;
-                    });
-                    count = 1;
-                   
+                        $scope.$apply();
+                    }
                     
+                    count = 1;
                 }
 
             }
@@ -211,7 +212,7 @@ app.controller('indexCtrl', function ($scope,$auth,Account,$state) {
             //  if(marker != undefined && marker != null){
             //   marker.remove();
             //  }
-            if(count){
+            if(markerCount){
                 corner1 = L.latLng(e.latlng.lat,e.latlng.lng)
                 corner2 = L.latLng(e.latlng.lat, e.latlng.lng);
                 bounds = L.latLngBounds(corner1, corner2);
@@ -230,7 +231,7 @@ app.controller('indexCtrl', function ($scope,$auth,Account,$state) {
                     rightBottom:rightBottom._leaflet_id,
 
                 }
-                count = 0;
+                markerCount = 0;
             }
             leftTop.on('drag',move);
             leftBottom.on('drag',move);
@@ -269,6 +270,7 @@ app.controller('indexCtrl', function ($scope,$auth,Account,$state) {
                     // $state.go("index");
                     $scope.items = data;
                     $scope.all = data;
+                    // $scope.$apply();
                     // $scope.all.map(function(item,index){
                     //     $scope.searchName.push(data[index].schoolName);
                     // })
@@ -292,20 +294,30 @@ app.controller('indexCtrl', function ($scope,$auth,Account,$state) {
                 schoolName:$scope.uniName
             }
             util.http("put", config.apiUrlPrefix + 'school/new', params, function (data) {
-                    location.reload();
+                    getSchool();
+                    $scope.$on('ngRepeatFinished', function (ngRepeatFinishedEvent) {
+                              //下面是在页面render完成后执行的js
+                            var schoolArray = document.getElementsByClassName('list-li');
+                            for(var i=0;i<schoolArray.length;i++){
+                                var curName = JSON.parse(schoolArray[i].attributes.latlng.nodeValue).schoolName;
+                                if(curName == $scope.uniName){
+                                    curTag = schoolArray[i];
+                                }
+                            }
+                            angular.element(curTag).triggerHandler('click',curTag);
+                    });
             }, function (error) {
                 $scope.errMsg = error.message;
                 $scope.alert = true;
                 $scope.title = error.message;
-                // $scope.$apply();
             });
         }else{
             $scope.alert = true;
             $scope.title = "学校名称不能为空";
         }
-        
     }
     $scope.editUni = function(e){
+        console.log(e);
         for(var i = 0;i<e.target.parentNode.children.length;i++){
             e.target.parentNode.children[i].style.background = "#eee";
         }
@@ -323,7 +335,6 @@ app.controller('indexCtrl', function ($scope,$auth,Account,$state) {
                 rec = L.rectangle(bound, {color: "#f00", weight: 1}).addTo(map);
             }
             map.fitBounds(bound);
-
         }else{
             if(rec){
                 rec.remove();
@@ -344,7 +355,6 @@ app.controller('indexCtrl', function ($scope,$auth,Account,$state) {
             }else{
                 searchSchool(data)
             }
-                
         }
     }
     $scope.searchIcon = function(data){
@@ -353,8 +363,6 @@ app.controller('indexCtrl', function ($scope,$auth,Account,$state) {
         }else{
             searchSchool(data)
         }
-        
-        // searchSchool(data);
     }
     function searchSchool(data){
         if(data != null && data != "" && typeof(data) != "undefined"){
@@ -374,7 +382,6 @@ app.controller('indexCtrl', function ($scope,$auth,Account,$state) {
         }
         
     }
-
     function searchPosition(data){
         var params = {
             q: data,
@@ -394,6 +401,7 @@ app.controller('indexCtrl', function ($scope,$auth,Account,$state) {
             }else{
                 $scope.alert = true;
                 $scope.title = "查询不到该地址";
+                map.setView(china,4)
             }
         }, function (error) {
             $scope.alert = true;
@@ -401,7 +409,6 @@ app.controller('indexCtrl', function ($scope,$auth,Account,$state) {
         });
     }
     $scope.moveover = function(e){
-        console.log(e);
         // e.stopPropagation();
         e.target.children[0].style.display = 'inline';
 
@@ -418,7 +425,12 @@ app.controller('indexCtrl', function ($scope,$auth,Account,$state) {
         e.target.style.display = 'none';
     }
     $scope.delete = function(e){
-        $scope.confirmtitle = "你确定删除?";
+        e.stopPropagation();
+        if(JSON.parse(e.target.parentElement.attributes.latlng.nodeValue).southWestLat){
+            $scope.confirmtitle = "删除后地理轮廓需重新绘制，确认删除?";
+        }else{
+            $scope.confirmtitle = "确定删除?";
+        }
         $scope.confirm = true;
         $scope.deleteId = JSON.parse(e.target.parentElement.attributes.latlng.nodeValue)._id;
     }
@@ -434,14 +446,13 @@ app.controller('indexCtrl', function ($scope,$auth,Account,$state) {
                         $scope.errMsg = error.message;
                         $scope.alert = true;
                         $scope.title = error.message;
-                        // $scope.$apply();
             });
     }
     $scope.hideConfirm = function(){
         $scope.confirm = false;
     }
     var locate = map.locate({
-        timeout:0
+        // timeout:0
     });
     locate.on('locationfound',locationfound);
     locate.on('locationerror',locationerror);
@@ -453,4 +464,13 @@ app.controller('indexCtrl', function ($scope,$auth,Account,$state) {
         $scope.title = "获取当前位置信息失败";
         map.setView(china,4);
     }
+    function addEvent(element, evnt,func){
+        if (element.attachEvent) // IE < 9
+            return element.attachEvent('on'+evnt,func);
+        else
+            return element.addEventListener(evnt,func, false);
+    }
+    map.on('click',function(){
+        alert(1);
+    })
 });
