@@ -109,10 +109,11 @@ app.controller('indexCtrl', function ($scope,$auth,Account,$state) {
 
             },
             _click:function(e){
-                e.stopPropagation();
+                // e.stopPropagation();
                 if(count){
                     if(rec){
-                        var positionData = rec.getBounds();
+                        var positionData
+                         = rec.getBounds();
                         positionData.leftBottom = positionData._southWest;
                         positionData.rightTop = positionData._northEast;
                         leftTop = L.marker([positionData.rightTop.lat, positionData.leftBottom.lng], {icon: myIcon,draggable:true}).addTo(map);
@@ -130,6 +131,7 @@ app.controller('indexCtrl', function ($scope,$auth,Account,$state) {
                         leftBottom.on('drag',move);
                         rightTop.on('drag',move);
                         rightBottom.on('drag',move);
+                        $scope.curPosition = positionData;
 
                     }else{
                         map.on('click',setMarker);
@@ -180,17 +182,14 @@ app.controller('indexCtrl', function ($scope,$auth,Account,$state) {
         L.control.draw = function(options){
             return new L.Control.Draw(options);
         }
-        
-    //移动时计算坐标
-    function move(e){
+     //新增-移动时计算坐标
+     function setMove(e){
         var position = rec.getBounds();
         var data = {} ;
-        // console.log(position);
-        // console.log(e);
         if(e.target._leaflet_id == ids.leftTop){
             // console.log('左上')
-            data.rightTop = {lat:e.latlng.lat,lng:position._northEast.lng};
-            data.leftBottom = {lat:position._southWest.lat,lng:e.latlng.lng};
+            data.rightTop = {lat:e.latlng.lat,lng:$scope.curPosition._northEast.lng};
+            data.leftBottom = {lat:$scope.curPosition._southWest.lat,lng:e.latlng.lng};
         }else if(e.target._leaflet_id == ids.leftBottom){
             // console.log('左下')
             data.leftBottom = e.latlng;
@@ -199,14 +198,64 @@ app.controller('indexCtrl', function ($scope,$auth,Account,$state) {
             // console.log('右上')
             data.rightTop = {lat:e.latlng.lat,lng:e.latlng.lng};
             data.leftBottom = position._southWest;
+        }else if(e.target._leaflet_id == ids.rightBottom){
+            // console.log('右下')
+            data.rightTop = {lat:position._northEast.lat,lng:e.latlng.lng};
+            data.leftBottom = {lat:e.latlng.lat,lng:position._southWest.lng};
+        }
+        reDraw(data);
+
+     }
+    //编辑-移动时计算坐标
+    function move(e){
+        var position = rec.getBounds();
+        var data = {} ;
+        // console.log(position);
+        // console.log(e);
+        if(e.target._leaflet_id == ids.leftTop){
+            // console.log('左上')
+            data.rightTop = {lat:e.latlng.lat,lng:$scope.curPosition._northEast.lng};
+            data.leftBottom = {lat:$scope.curPosition._southWest.lat,lng:e.latlng.lng};
+            if($scope.curPosition.leftBottom.lng>=e.latlng.lng&&$scope.curPosition.rightTop.lat<=e.latlng.lat){
+                reDraw(data);
+            }else{
+                var position = rec.getBounds();
+                leftTop.setLatLng([position._northEast.lat,position._southWest.lng]);
+            }
+        }else if(e.target._leaflet_id == ids.leftBottom){
+            // console.log('左下')
+            data.leftBottom = e.latlng;
+            data.rightTop = position._northEast;
+             if($scope.curPosition.leftBottom.lng>=e.latlng.lng&&$scope.curPosition.leftBottom.lat>=e.latlng.lat){
+                reDraw(data);
+            }else{
+                var position = rec.getBounds();
+                leftBottom.setLatLng([position._southWest.lat,position._southWest.lng]);
+            }
+
+        }else if(e.target._leaflet_id == ids.rightTop){
+            // console.log('右上')
+            data.rightTop = {lat:e.latlng.lat,lng:e.latlng.lng};
+            data.leftBottom = position._southWest;
+             if($scope.curPosition.rightTop.lng<=e.latlng.lng&&$scope.curPosition.rightTop.lat<=e.latlng.lat){
+                reDraw(data);
+            }else{
+                var position = rec.getBounds();
+                rightTop.setLatLng([position._northEast.lat,position._northEast.lng]);
+            }
+
 
         }else if(e.target._leaflet_id == ids.rightBottom){
             // console.log('右下')
             data.rightTop = {lat:position._northEast.lat,lng:e.latlng.lng};
             data.leftBottom = {lat:e.latlng.lat,lng:position._southWest.lng};
-
+             if($scope.curPosition.rightTop.lng<=e.latlng.lng&&$scope.curPosition.leftBottom.lat>=e.latlng.lat){
+                reDraw(data);
+            }else{
+                var position = rec.getBounds();
+                rightBottom.setLatLng([position._southWest.lat,position._northEast.lng]);
+            }
         }
-        reDraw(data);
     }
          function setMarker(e){
             //  if(marker != undefined && marker != null){
@@ -233,10 +282,10 @@ app.controller('indexCtrl', function ($scope,$auth,Account,$state) {
                 }
                 markerCount = 0;
             }
-            leftTop.on('drag',move);
-            leftBottom.on('drag',move);
-            rightTop.on('drag',move);
-            rightBottom.on('drag',move);
+            leftTop.on('drag',setMove);
+            leftBottom.on('drag',setMove);
+            rightTop.on('drag',setMove);
+            rightBottom.on('drag',setMove);
         }
         //重新绘制地图
         function reDraw(data){
@@ -470,7 +519,4 @@ app.controller('indexCtrl', function ($scope,$auth,Account,$state) {
         else
             return element.addEventListener(evnt,func, false);
     }
-    map.on('click',function(){
-        alert(1);
-    })
 });
