@@ -10,6 +10,7 @@ app.controller('indexCtrl', function ($scope,$auth,Account,$state) {
     $scope.currentName=[];
     $scope.title = "";
     $scope.confirmtitle = "";
+    var city = "";
     // $scope.delete = false;
     if (!Account.isAuthenticated()) {
         $state.go("login");
@@ -53,6 +54,22 @@ app.controller('indexCtrl', function ($scope,$auth,Account,$state) {
             marker = L.marker(e.latlng,{icon:myIcon,draggable:true}).addTo(map);
             marker.on("drag",drawRec);
         }
+        //创建显示所属省市控件
+        // L.Control.City = L.Control.extend({
+        //     options:{
+        //         position:"topright"
+        //     },
+        //     onAdd:function(map){
+        //         var container = L.DomUtil.create('div','city');
+        //         var options = this.options;
+        //         container.innerText = $scope.city;
+        //         return container;
+        //     }
+        // })
+        // L.control.city = function(options){
+        //     return new L.Control.City(options);
+        // }
+        // L.control.city().addTo(map);
         //创建搜索控件
         L.Control.Search = L.Control.extend({
             options:{
@@ -61,6 +78,7 @@ app.controller('indexCtrl', function ($scope,$auth,Account,$state) {
             onAdd:function(map){
                 var container = L.DomUtil.create('div','search-ctrl');
                 var options = this.options;
+                
                 var input = L.DomUtil.create('input','search-ctrl-inp');
                 input.placeholder = "请输入地点";
                 var button =L.DomUtil.create('img','search-ctrl-btn');
@@ -98,10 +116,15 @@ app.controller('indexCtrl', function ($scope,$auth,Account,$state) {
                 position:"topright"
             },
             onAdd:function(map){
-                var container = L.DomUtil.create('div','draw-btn');
+                var container = L.DomUtil.create('div','draw');
                 var options = this.options;
-                container.innerText = "绘制";
-                container.onclick = this._click;
+                var city = L.DomUtil.create('div','city');
+                // city.innerText = $scope.city;
+                var btn = L.DomUtil.create('div','draw-btn');
+                btn.innerText = "绘制";
+                container.appendChild(city);
+                container.appendChild(btn);
+                btn.onclick = this._click;
                 if (L.DomEvent) {
                     L.DomEvent.disableClickPropagation(container);
                 }
@@ -112,8 +135,7 @@ app.controller('indexCtrl', function ($scope,$auth,Account,$state) {
                 // e.stopPropagation();
                 if(count){
                     if(rec){
-                        var positionData
-                         = rec.getBounds();
+                        var positionData = rec.getBounds();
                         positionData.leftBottom = positionData._southWest;
                         positionData.rightTop = positionData._northEast;
                         leftTop = L.marker([positionData.rightTop.lat, positionData.leftBottom.lng], {icon: myIcon,draggable:true}).addTo(map);
@@ -188,8 +210,8 @@ app.controller('indexCtrl', function ($scope,$auth,Account,$state) {
         var data = {} ;
         if(e.target._leaflet_id == ids.leftTop){
             // console.log('左上')
-            data.rightTop = {lat:e.latlng.lat,lng:$scope.curPosition._northEast.lng};
-            data.leftBottom = {lat:$scope.curPosition._southWest.lat,lng:e.latlng.lng};
+            data.rightTop = {lat:e.latlng.lat,lng:position._northEast.lng};
+            data.leftBottom = {lat:position._southWest.lat,lng:e.latlng.lng};
         }else if(e.target._leaflet_id == ids.leftBottom){
             // console.log('左下')
             data.leftBottom = e.latlng;
@@ -214,8 +236,8 @@ app.controller('indexCtrl', function ($scope,$auth,Account,$state) {
         // console.log(e);
         if(e.target._leaflet_id == ids.leftTop){
             // console.log('左上')
-            data.rightTop = {lat:e.latlng.lat,lng:$scope.curPosition._northEast.lng};
-            data.leftBottom = {lat:$scope.curPosition._southWest.lat,lng:e.latlng.lng};
+            data.rightTop = {lat:e.latlng.lat,lng:position._northEast.lng};
+            data.leftBottom = {lat:position._southWest.lat,lng:e.latlng.lng};
             if($scope.curPosition.leftBottom.lng>=e.latlng.lng&&$scope.curPosition.rightTop.lat<=e.latlng.lat){
                 reDraw(data);
             }else{
@@ -366,7 +388,8 @@ app.controller('indexCtrl', function ($scope,$auth,Account,$state) {
         }
     }
     $scope.editUni = function(e){
-        console.log(e);
+        // console.log(e);
+
         for(var i = 0;i<e.target.parentNode.children.length;i++){
             e.target.parentNode.children[i].style.background = "#eee";
         }
@@ -384,12 +407,13 @@ app.controller('indexCtrl', function ($scope,$auth,Account,$state) {
                 rec = L.rectangle(bound, {color: "#f00", weight: 1}).addTo(map);
             }
             map.fitBounds(bound);
+            searchPosition(latlng.schoolName,true);
         }else{
             if(rec){
                 rec.remove();
                 rec = '';
             }
-            searchPosition(latlng.schoolName);
+            searchPosition(latlng.schoolName,false);
         }
         if(!drawCtrl){
             drawCtrl = L.control.draw().addTo(map);
@@ -431,7 +455,8 @@ app.controller('indexCtrl', function ($scope,$auth,Account,$state) {
         }
         
     }
-    function searchPosition(data){
+    function searchPosition(data,flag){
+
         var params = {
             q: data,
             format: "json",
@@ -440,22 +465,48 @@ app.controller('indexCtrl', function ($scope,$auth,Account,$state) {
             countrycodes: "cn",
             limit: 1
         }
-        util.http("get", "http://nominatim.openstreetmap.org/search", params, function (data) {
+        if(flag){
+            util.http("get", "http://nominatim.openstreetmap.org/search", params, function (data) {
             // console.log(data[0].lat)
-            if (data && data.length > 0) {
-                var lat = data[0].lat;
-                var lon = data[0].lon;
-                var searchPos = [lat, lon];
-                map.setView(searchPos, 17);
-            }else{
+                if (data && data.length > 0) {
+                    if(data[0].address.city){
+                        document.getElementsByClassName('city')[0].innerText = data[0].address.city;
+                    }else if(data[0].address.state_district){
+                        document.getElementsByClassName('city')[0].innerText = data[0].address.state_district;
+                    }else if(data[0].address.state){
+                        document.getElementsByClassName('city')[0].innerText = data[0].address.state;
+                    }else{
+                        return false;
+                    }
+                }
+            }, function (error) {
+                    $scope.alert = true;
+                    $scope.title = "查询地址信息失败";
+            });
+        }else{
+            util.http("get", "http://nominatim.openstreetmap.org/search", params, function (data) {
+            // console.log(data[0].lat)
+                if (data && data.length > 0) {
+                    var lat = data[0].lat;
+                    var lon = data[0].lon;
+                    var searchPos = [lat, lon];
+                    map.setView(searchPos, 17);
+                    if(data[0].address.city){
+                        document.getElementsByClassName('city')[0].innerText = data[0].address.city;
+                    }else if(data[0].address.state_district){
+                        document.getElementsByClassName('city')[0].innerText = data[0].address.state_district;
+                    }
+                }else{
+                    $scope.alert = true;
+                    $scope.title = "查询不到该地址";
+                    map.setView(china,4)
+                }
+            }, function (error) {
                 $scope.alert = true;
-                $scope.title = "查询不到该地址";
-                map.setView(china,4)
-            }
-        }, function (error) {
-            $scope.alert = true;
-            $scope.title = "查询地址信息失败";
-        });
+                $scope.title = "查询地址信息失败";
+            });
+        }
+        
     }
     $scope.moveover = function(e){
         // e.stopPropagation();
