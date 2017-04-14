@@ -363,6 +363,7 @@ app.controller('indexCtrl', function ($scope,$auth,Account,$state) {
     }
     $scope.hideAdd = function(){
         $scope.add = false;
+        $scope.schooleName = '';
     }
     //新增学校
     $scope.addUniversity = function(schooleName){
