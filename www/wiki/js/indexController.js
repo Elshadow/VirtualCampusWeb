@@ -6,6 +6,7 @@ app.controller('indexCtrl', function ($scope,$auth,Account,$state) {
     $scope.flag = false;
     $scope.alert = false;
     $scope.confirm = false;
+    $scope.add = false;
     $scope.searchName=[];
     $scope.currentName=[];
     $scope.title = "";
@@ -356,13 +357,20 @@ app.controller('indexCtrl', function ($scope,$auth,Account,$state) {
         $scope.alert = false;
         // $scope.$apply();
     }
+    $scope.showAdd = function(){
+        $scope.add = true;
+    }
+    $scope.hideAdd = function(){
+        $scope.add = false;
+    }
     //新增学校
-    $scope.addUniversity = function(){
+    $scope.addUniversity = function(schooleName){
+        var curTag;
         // console.log($scope.uniName)
-        if($scope.uniName != null && $scope.uniName != "" && typeof($scope.uniName) != "undefined"){
+        if(schooleName){
             // var str = $scope.uniName.replace(/\s+/g, "")
             var params = {
-                schoolName:$scope.uniName
+                schoolName:schooleName
             }
             util.http("put", config.apiUrlPrefix + 'school/new', params, function (data) {
                     getSchool();
@@ -371,11 +379,12 @@ app.controller('indexCtrl', function ($scope,$auth,Account,$state) {
                             var schoolArray = document.getElementsByClassName('list-li');
                             for(var i=0;i<schoolArray.length;i++){
                                 var curName = JSON.parse(schoolArray[i].attributes.latlng.nodeValue).schoolName;
-                                if(curName == $scope.uniName){
+                                if(curName == schooleName){
                                     curTag = schoolArray[i];
                                 }
                             }
                             angular.element(curTag).triggerHandler('click',curTag);
+                            $scope.add = false;
                     });
             }, function (error) {
                 $scope.errMsg = error.message;
@@ -469,12 +478,12 @@ app.controller('indexCtrl', function ($scope,$auth,Account,$state) {
             util.http("get", "http://nominatim.openstreetmap.org/search", params, function (data) {
             // console.log(data[0].lat)
                 if (data && data.length > 0) {
-                    if(data[0].address.city){
-                        document.getElementsByClassName('city')[0].innerText = data[0].address.city;
-                    }else if(data[0].address.state_district){
+                    if(data[0].address.state_district){
                         document.getElementsByClassName('city')[0].innerText = data[0].address.state_district;
                     }else if(data[0].address.state){
                         document.getElementsByClassName('city')[0].innerText = data[0].address.state;
+                    }else if(data[0].address.city){
+                        document.getElementsByClassName('city')[0].innerText = data[0].address.city;
                     }else{
                         return false;
                     }
@@ -497,8 +506,8 @@ app.controller('indexCtrl', function ($scope,$auth,Account,$state) {
                         document.getElementsByClassName('city')[0].innerText = data[0].address.state_district;
                     }
                 }else{
-                    $scope.alert = true;
-                    $scope.title = "查询不到该地址";
+                    // $scope.alert = true;
+                    // $scope.title = "查询不到该地址";
                     map.setView(china,4)
                 }
             }, function (error) {
