@@ -187,6 +187,7 @@ app.controller('indexCtrl', function ($scope,$auth,Account,$state) {
                             leftBottom.remove();
                             rightTop.remove();
                             rightBottom.remove();
+                            markerCount = 1;
 
                         }, function (error) {
                             $scope.errMsg = error.message;
@@ -386,6 +387,7 @@ app.controller('indexCtrl', function ($scope,$auth,Account,$state) {
                             angular.element(curTag).triggerHandler('click',curTag);
                             $scope.add = false;
                     });
+                    $scope.schooleName = '';
             }, function (error) {
                 $scope.errMsg = error.message;
                 $scope.alert = true;
