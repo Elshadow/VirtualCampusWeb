@@ -157,7 +157,7 @@ body{
         opacity: 0.2;
         /*display: none;*/
     }
-    .alert-mask,.confirm-mask{
+    .alert-mask,.confirm-mask,.add-mask{
         width:100%;
         /*height:100%;*/
         background:#000;
@@ -166,10 +166,16 @@ body{
         right: 0px;
         top: 0px;
         bottom: 0px;
-        z-index:99999;
         opacity: 0.2;
     }
-    .alert-box,.confirm-box{
+    .alert-mask{
+        z-index:10006
+        ;
+    }
+    .confirm-mask,.add-mask{
+        z-index:10000;
+    }
+    .alert-box,.confirm-box,.add-box{
         width: 400px;
         /* height: 300px; */
         position: fixed;
@@ -178,9 +184,15 @@ body{
         right: 0px;
         top: 200px;
         /* bottom: 0px; */
-        z-index: 1000000;
+        /*z-index: 10001;*/
         background: #fff;
         text-align: center;
+    }
+    .alert-box{
+        z-index:10009;
+    }
+    .confirm-box,.add-box{
+        z-index:10005;
     }
     .alert-title{
         width: 100%;
@@ -229,6 +241,9 @@ body{
         left:300px;
         /*right:5px;*/
     }
+    .add-input{
+        width:80%;
+    }
 </style>
 
 <div ng-controller="indexCtrl" >
@@ -244,11 +259,18 @@ body{
         <div class="sure-btn cursor" data-id="deleteId" ng-click="sureDelete()">确定</div>
         <div class="sure-cancel cursor" ng-click="hideConfirm()">取消</div>
     </div>
+    <div class="add-mask" ng-show="add"></div>
+    <div class="add-box" ng-show="add">
+        <div class="add-title">添加学校</div>
+        <input class="add-input" ng-model='schooleName' placeholder="请输入学校名称" />
+        <div class="sure-btn cursor" ng-click="addUniversity(schooleName)">确定</div>
+        <div class="sure-cancel cursor" ng-click="hideAdd()">取消</div>
+    </div>
     <header class="header">绘制高校地图范围</header>
     <main class="main">
         <div class="left-part">
             <div class="search">
-                <span class="add-university cursor" ng-click="addUniversity()">+</span>
+                <span class="add-university cursor" ng-click="showAdd()">+</span>
                 <input ng-keydown="searchInp($event)" ng-model="uniName" type="text" placeholder="学校名称" class="search-input" ng-trim="true"/>
                 <img class="search-icon cursor" src="./wiki/assets/images/search.png" ng-click="searchIcon(uniName)" />
             </div>
