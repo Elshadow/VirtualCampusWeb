@@ -163,6 +163,8 @@ app.controller('indexCtrl', function ($scope,$auth,Account,$state) {
                     $scope.$apply();
                     e.target.innerText = '完成绘制';
                     count = 0;
+                    markerCount = 1;
+
                 }else {
                     if(rec){
                         var latlng = rec.getBounds();
@@ -187,7 +189,8 @@ app.controller('indexCtrl', function ($scope,$auth,Account,$state) {
                             leftBottom.remove();
                             rightTop.remove();
                             rightBottom.remove();
-                            markerCount = 1;
+                            markerCount = 0;
+                            
 
                         }, function (error) {
                             $scope.errMsg = error.message;
