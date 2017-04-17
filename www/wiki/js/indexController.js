@@ -21,7 +21,7 @@ app.controller('indexCtrl', function ($scope,$auth,Account,$state) {
         zoomControl:false
     });
     var china = [37.899050079360935, 102.83203125];
-    // map.setView(china,4);
+    map.setView(china,4);
 
     // map.locationfound = function(e){
     //     console.log(e);
@@ -570,19 +570,19 @@ app.controller('indexCtrl', function ($scope,$auth,Account,$state) {
     $scope.hideConfirm = function(){
         $scope.confirm = false;
     }
-    var locate = map.locate({
+    // var locate = map.locate({
         // timeout:0
-    });
-    locate.on('locationfound',locationfound);
-    locate.on('locationerror',locationerror);
-    function locationfound(e){
-        map.setView([e.latlng.lat,e.latlng.lng],15);
-    }
-    function locationerror(e){
-        $scope.alert = true;
-        $scope.title = "获取当前位置信息失败";
-        map.setView(china,4);
-    }
+    // });
+    // locate.on('locationfound',locationfound);
+    // locate.on('locationerror',locationerror);
+    // function locationfound(e){
+    //     map.setView([e.latlng.lat,e.latlng.lng],15);
+    // }
+    // function locationerror(e){
+    //     $scope.alert = true;
+    //     $scope.title = "获取当前位置信息失败";
+    //     map.setView(china,4);
+    // }
     function addEvent(element, evnt,func){
         if (element.attachEvent) // IE < 9
             return element.attachEvent('on'+evnt,func);
