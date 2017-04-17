@@ -189,7 +189,6 @@ app.controller('indexCtrl', function ($scope,$auth,Account,$state) {
                             leftBottom.remove();
                             rightTop.remove();
                             rightBottom.remove();
-                            markerCount = 0;
                             
 
                         }, function (error) {
@@ -202,6 +201,8 @@ app.controller('indexCtrl', function ($scope,$auth,Account,$state) {
                     }
                     
                     count = 1;
+                    markerCount = 0;
+
                 }
 
             }
