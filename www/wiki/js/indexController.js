@@ -189,7 +189,6 @@ app.controller('indexCtrl', function ($scope,$auth,Account,$state) {
                             leftBottom.remove();
                             rightTop.remove();
                             rightBottom.remove();
-                            markerCount = 0;
                             
 
                         }, function (error) {
@@ -202,6 +201,8 @@ app.controller('indexCtrl', function ($scope,$auth,Account,$state) {
                     }
                     
                     count = 1;
+                    markerCount = 0;
+
                 }
 
             }
@@ -471,7 +472,6 @@ app.controller('indexCtrl', function ($scope,$auth,Account,$state) {
         
     }
     function searchPosition(data,flag){
-
         var params = {
             q: data,
             format: "json",
@@ -491,8 +491,11 @@ app.controller('indexCtrl', function ($scope,$auth,Account,$state) {
                     }else if(data[0].address.city){
                         document.getElementsByClassName('city')[0].innerText = data[0].address.city;
                     }else{
-                        return false;
+                        document.getElementsByClassName('city')[0].innerText = "";
                     }
+                }else{
+                    document.getElementsByClassName('city')[0].innerText = "";
+                    
                 }
             }, function (error) {
                     $scope.alert = true;
@@ -514,6 +517,7 @@ app.controller('indexCtrl', function ($scope,$auth,Account,$state) {
                 }else{
                     // $scope.alert = true;
                     // $scope.title = "查询不到该地址";
+                    document.getElementsByClassName('city')[0].innerText = "";
                     map.setView(china,4)
                 }
             }, function (error) {
