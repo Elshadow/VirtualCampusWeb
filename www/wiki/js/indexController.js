@@ -33,7 +33,7 @@ app.controller('indexCtrl', function ($scope,$auth,Account,$state) {
     // }
     var marker,leftTop,leftBottom,rightTop,rightBottom;
     var corner1,corner2,bounds,rec,ids={},drawCtrl;
-    var count = 1,markerCount = 1;
+    var count = 1;
     L.tileLayer('http://{s}.tile.osm.org/{z}/{x}/{y}.png', {
           attribution: '&copy; <a href="http://osm.org/copyright">OpenStreetMap</a> contributors',
       }).addTo(map);
@@ -155,6 +155,7 @@ app.controller('indexCtrl', function ($scope,$auth,Account,$state) {
                         rightTop.on('drag',move);
                         rightBottom.on('drag',move);
                         $scope.curPosition = positionData;
+                        // markerCount = 1;
 
                     }else{
                         map.on('click',setMarker);
@@ -163,7 +164,6 @@ app.controller('indexCtrl', function ($scope,$auth,Account,$state) {
                     $scope.$apply();
                     e.target.innerText = '完成绘制';
                     count = 0;
-                    markerCount = 1;
 
                 }else {
                     if(rec){
@@ -201,7 +201,8 @@ app.controller('indexCtrl', function ($scope,$auth,Account,$state) {
                     }
                     
                     count = 1;
-                    markerCount = 0;
+                    // markerCount = 1;
+                    // map.off('click');
 
                 }
 
@@ -289,7 +290,7 @@ app.controller('indexCtrl', function ($scope,$auth,Account,$state) {
             //  if(marker != undefined && marker != null){
             //   marker.remove();
             //  }
-            if(markerCount){
+            // if(markerCount){
                 corner1 = L.latLng(e.latlng.lat,e.latlng.lng)
                 corner2 = L.latLng(e.latlng.lat, e.latlng.lng);
                 bounds = L.latLngBounds(corner1, corner2);
@@ -308,8 +309,9 @@ app.controller('indexCtrl', function ($scope,$auth,Account,$state) {
                     rightBottom:rightBottom._leaflet_id,
 
                 }
-                markerCount = 0;
-            }
+                // markerCount = 0;
+            // }
+            map.off('click',setMarker);
             leftTop.on('drag',setMove);
             leftBottom.on('drag',setMove);
             rightTop.on('drag',setMove);
@@ -372,6 +374,7 @@ app.controller('indexCtrl', function ($scope,$auth,Account,$state) {
     //新增学校
     $scope.addUniversity = function(schooleName){
         var curTag;
+        var compelete = true;
         // console.log($scope.uniName)
         if(schooleName){
             // var str = $scope.uniName.replace(/\s+/g, "")
@@ -380,18 +383,25 @@ app.controller('indexCtrl', function ($scope,$auth,Account,$state) {
             }
             util.http("put", config.apiUrlPrefix + 'school/new', params, function (data) {
                     getSchool();
-                    $scope.$on('ngRepeatFinished', function (ngRepeatFinishedEvent) {
+                        $scope.$on('ngRepeatFinished', function (ngRepeatFinishedEvent) {
                               //下面是在页面render完成后执行的js
-                            var schoolArray = document.getElementsByClassName('list-li');
-                            for(var i=0;i<schoolArray.length;i++){
-                                var curName = JSON.parse(schoolArray[i].attributes.latlng.nodeValue).schoolName;
-                                if(curName == schooleName){
-                                    curTag = schoolArray[i];
+                                var schoolArray = document.getElementsByClassName('list-li');
+                                for(var i=0;i<schoolArray.length;i++){
+                                    var curName = JSON.parse(schoolArray[i].attributes.latlng.nodeValue).schoolName;
+                                    if(curName == schooleName){
+                                        curTag = schoolArray[i];
+                                    }
                                 }
-                            }
-                            angular.element(curTag).triggerHandler('click',curTag);
-                            $scope.add = false;
-                    });
+                                if(compelete){
+                                    angular.element(curTag).triggerHandler('click',curTag);
+                                    $scope.add = false;
+                                    compelete = false;
+                                }else{
+                                    return false;
+                                }
+                                
+                                
+                        });
                     $scope.schooleName = '';
             }, function (error) {
                 $scope.errMsg = error.message;
