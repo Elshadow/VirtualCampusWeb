@@ -82,6 +82,7 @@ app.controller('indexCtrl', function ($scope,$auth,Account,$state) {
                 
                 var input = L.DomUtil.create('input','search-ctrl-inp');
                 input.placeholder = "请输入地点";
+                input.setAttribute("maxlength", "50");
                 var button =L.DomUtil.create('img','search-ctrl-btn');
                 button.src = "./wiki/assets/images/search.png"
                 input.onkeydown = this._find;
