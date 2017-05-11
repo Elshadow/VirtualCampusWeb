@@ -21,7 +21,7 @@ app.controller('indexCtrl', function ($scope,$auth,Account,$state) {
         zoomControl:false
     });
     var china = [37.899050079360935, 102.83203125];
-    // map.setView(china,4);
+    map.setView(china,4);
 
     // map.locationfound = function(e){
     //     console.log(e);
@@ -33,7 +33,7 @@ app.controller('indexCtrl', function ($scope,$auth,Account,$state) {
     // }
     var marker,leftTop,leftBottom,rightTop,rightBottom;
     var corner1,corner2,bounds,rec,ids={},drawCtrl;
-    var count = 1,markerCount = 1;
+    var count = 1;
     L.tileLayer('http://{s}.tile.osm.org/{z}/{x}/{y}.png', {
           attribution: '&copy; <a href="http://osm.org/copyright">OpenStreetMap</a> contributors',
       }).addTo(map);
@@ -82,6 +82,7 @@ app.controller('indexCtrl', function ($scope,$auth,Account,$state) {
                 
                 var input = L.DomUtil.create('input','search-ctrl-inp');
                 input.placeholder = "请输入地点";
+                input.setAttribute("maxlength", "50");
                 var button =L.DomUtil.create('img','search-ctrl-btn');
                 button.src = "./wiki/assets/images/search.png"
                 input.onkeydown = this._find;
@@ -155,6 +156,7 @@ app.controller('indexCtrl', function ($scope,$auth,Account,$state) {
                         rightTop.on('drag',move);
                         rightBottom.on('drag',move);
                         $scope.curPosition = positionData;
+                        // markerCount = 1;
 
                     }else{
                         map.on('click',setMarker);
@@ -163,6 +165,7 @@ app.controller('indexCtrl', function ($scope,$auth,Account,$state) {
                     $scope.$apply();
                     e.target.innerText = '完成绘制';
                     count = 0;
+
                 }else {
                     if(rec){
                         var latlng = rec.getBounds();
@@ -187,6 +190,7 @@ app.controller('indexCtrl', function ($scope,$auth,Account,$state) {
                             leftBottom.remove();
                             rightTop.remove();
                             rightBottom.remove();
+                            
 
                         }, function (error) {
                             $scope.errMsg = error.message;
@@ -198,6 +202,9 @@ app.controller('indexCtrl', function ($scope,$auth,Account,$state) {
                     }
                     
                     count = 1;
+                    // markerCount = 1;
+                    // map.off('click');
+
                 }
 
             }
@@ -284,7 +291,7 @@ app.controller('indexCtrl', function ($scope,$auth,Account,$state) {
             //  if(marker != undefined && marker != null){
             //   marker.remove();
             //  }
-            if(markerCount){
+            // if(markerCount){
                 corner1 = L.latLng(e.latlng.lat,e.latlng.lng)
                 corner2 = L.latLng(e.latlng.lat, e.latlng.lng);
                 bounds = L.latLngBounds(corner1, corner2);
@@ -303,8 +310,9 @@ app.controller('indexCtrl', function ($scope,$auth,Account,$state) {
                     rightBottom:rightBottom._leaflet_id,
 
                 }
-                markerCount = 0;
-            }
+                // markerCount = 0;
+            // }
+            map.off('click',setMarker);
             leftTop.on('drag',setMove);
             leftBottom.on('drag',setMove);
             rightTop.on('drag',setMove);
@@ -362,10 +370,12 @@ app.controller('indexCtrl', function ($scope,$auth,Account,$state) {
     }
     $scope.hideAdd = function(){
         $scope.add = false;
+        $scope.schooleName = '';
     }
     //新增学校
     $scope.addUniversity = function(schooleName){
         var curTag;
+        var compelete = true;
         // console.log($scope.uniName)
         if(schooleName){
             // var str = $scope.uniName.replace(/\s+/g, "")
@@ -374,18 +384,26 @@ app.controller('indexCtrl', function ($scope,$auth,Account,$state) {
             }
             util.http("put", config.apiUrlPrefix + 'school/new', params, function (data) {
                     getSchool();
-                    $scope.$on('ngRepeatFinished', function (ngRepeatFinishedEvent) {
+                        $scope.$on('ngRepeatFinished', function (ngRepeatFinishedEvent) {
                               //下面是在页面render完成后执行的js
-                            var schoolArray = document.getElementsByClassName('list-li');
-                            for(var i=0;i<schoolArray.length;i++){
-                                var curName = JSON.parse(schoolArray[i].attributes.latlng.nodeValue).schoolName;
-                                if(curName == schooleName){
-                                    curTag = schoolArray[i];
+                                var schoolArray = document.getElementsByClassName('list-li');
+                                for(var i=0;i<schoolArray.length;i++){
+                                    var curName = JSON.parse(schoolArray[i].attributes.latlng.nodeValue).schoolName;
+                                    if(curName == schooleName){
+                                        curTag = schoolArray[i];
+                                    }
                                 }
-                            }
-                            angular.element(curTag).triggerHandler('click',curTag);
-                            $scope.add = false;
-                    });
+                                if(compelete){
+                                    angular.element(curTag).triggerHandler('click',curTag);
+                                    $scope.add = false;
+                                    compelete = false;
+                                }else{
+                                    return false;
+                                }
+                                
+                                
+                        });
+                    $scope.schooleName = '';
             }, function (error) {
                 $scope.errMsg = error.message;
                 $scope.alert = true;
@@ -465,7 +483,6 @@ app.controller('indexCtrl', function ($scope,$auth,Account,$state) {
         
     }
     function searchPosition(data,flag){
-
         var params = {
             q: data,
             format: "json",
@@ -485,8 +502,11 @@ app.controller('indexCtrl', function ($scope,$auth,Account,$state) {
                     }else if(data[0].address.city){
                         document.getElementsByClassName('city')[0].innerText = data[0].address.city;
                     }else{
-                        return false;
+                        document.getElementsByClassName('city')[0].innerText = "";
                     }
+                }else{
+                    document.getElementsByClassName('city')[0].innerText = "";
+                    
                 }
             }, function (error) {
                     $scope.alert = true;
@@ -508,6 +528,7 @@ app.controller('indexCtrl', function ($scope,$auth,Account,$state) {
                 }else{
                     // $scope.alert = true;
                     // $scope.title = "查询不到该地址";
+                    document.getElementsByClassName('city')[0].innerText = "";
                     map.setView(china,4)
                 }
             }, function (error) {
@@ -560,19 +581,19 @@ app.controller('indexCtrl', function ($scope,$auth,Account,$state) {
     $scope.hideConfirm = function(){
         $scope.confirm = false;
     }
-    var locate = map.locate({
+    // var locate = map.locate({
         // timeout:0
-    });
-    locate.on('locationfound',locationfound);
-    locate.on('locationerror',locationerror);
-    function locationfound(e){
-        map.setView([e.latlng.lat,e.latlng.lng],15);
-    }
-    function locationerror(e){
-        $scope.alert = true;
-        $scope.title = "获取当前位置信息失败";
-        map.setView(china,4);
-    }
+    // });
+    // locate.on('locationfound',locationfound);
+    // locate.on('locationerror',locationerror);
+    // function locationfound(e){
+    //     map.setView([e.latlng.lat,e.latlng.lng],15);
+    // }
+    // function locationerror(e){
+    //     $scope.alert = true;
+    //     $scope.title = "获取当前位置信息失败";
+    //     map.setView(china,4);
+    // }
     function addEvent(element, evnt,func){
         if (element.attachEvent) // IE < 9
             return element.attachEvent('on'+evnt,func);

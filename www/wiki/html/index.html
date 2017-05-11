@@ -262,7 +262,7 @@ body{
     <div class="add-mask" ng-show="add"></div>
     <div class="add-box" ng-show="add">
         <div class="add-title">添加学校</div>
-        <input class="add-input" ng-model='schooleName' placeholder="请输入学校名称" />
+        <input maxlength="50" class="add-input" ng-model='schooleName' placeholder="请输入学校名称" />
         <div class="sure-btn cursor" ng-click="addUniversity(schooleName)">确定</div>
         <div class="sure-cancel cursor" ng-click="hideAdd()">取消</div>
     </div>
@@ -271,7 +271,7 @@ body{
         <div class="left-part">
             <div class="search">
                 <span class="add-university cursor" ng-click="showAdd()">+</span>
-                <input ng-keydown="searchInp($event)" ng-model="uniName" type="text" placeholder="学校名称" class="search-input" ng-trim="true"/>
+                <input maxlength="50" ng-keydown="searchInp($event)" ng-model="uniName" type="text" placeholder="学校名称" class="search-input" ng-trim="true"/>
                 <img class="search-icon cursor" src="./wiki/assets/images/search.png" ng-click="searchIcon(uniName)" />
             </div>
             <ul class="uni-list">
