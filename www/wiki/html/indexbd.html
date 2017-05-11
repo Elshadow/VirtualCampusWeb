@@ -1,0 +1,286 @@
+<style>
+*{
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    -moz-box-sizing:border-box; /* Firefox */
+    -webkit-box-sizing:border-box; /* Safari */
+    font-family: "微软雅黑";
+}
+input:-ms-input-placeholder,
+textarea:-ms-input-placeholder {
+    color: #999;
+}
+ul,ol{
+    list-style-type: none;
+}
+a {
+    color: #333;
+    text-decoration: none;
+}
+a:hover {
+    text-decoration: none;
+}
+.dsn{
+    display: none;
+}
+body{
+    font-family: "微软雅黑";
+}
+.cursor{
+    cursor: pointer;
+}
+/* 头部样式 */
+.header{
+    width:100%;
+    height:40px;
+    color:#000;
+    font-size:20px;
+    line-height: 40px;
+    text-indent: 20px;
+    font-weight:500;
+}
+.main{
+    width: 100%;
+    border-top: 1px solid #666;
+    padding: 10px;
+    min-width:1250px;
+}
+/*搜索框样式开始*/
+.left-part{
+    width:30%;
+    min-width:400px;
+    height: 500px;
+    border:1px solid #333;
+    border-radius: 5px;
+    text-align: center;
+    padding:10px 0px 10px 0px;
+    /*display: inline-block;*/
+    float: left;
+}
+/*搜索框*/
+.search{
+    position: relative;
+    /*width:90%;*/
+
+}
+/*添加学校按钮*/
+.add-university{
+    display: inline-block;
+    width: 40px;
+    height:40px;
+    background:#8c9cab;
+    color:#fff;
+    text-align: center;
+    line-height: 40px;
+}
+/*搜索输入框*/
+.search-input{
+    width:300px;
+    height:40px;
+    margin-left:-5px;
+    padding: 4px;
+}
+
+/*地图展示样式开始*/
+.right-part{
+    display: inline-block;
+    width:60%;
+    height:500px;
+    margin-left: 30px;
+}
+    #map{
+        width:100% ;
+        height:100% ;
+        z-index:9999;
+    }
+    .cursor{
+        cursor:pointer;
+    }
+    .div-icon{
+        width:10px;
+        height:10px;
+        background: yellow !important;
+        border: 1px solid black;
+    }
+    .draw-btn{
+        width:100px;
+        height:25px;
+        line-height: 25px;
+        background: #fff;
+        text-align: center;
+        border:1px solid #ccc;
+        cursor: pointer !important;
+        display: inline-block;
+        margin-left: 10px;
+    }
+    .city{
+        display: inline-block;
+        height:25px;
+        line-height: 25px;
+        background: #fff;
+    }
+    .uni-list{
+        height: 400px;
+        overflow-y: auto;
+        width: 85%;
+        margin: auto;
+        font-size: 16px;
+    }
+    .uni-list li{
+        width: 100%;
+        text-align: left;
+        height: 30px;
+        background: #eee;
+        margin-top: 3px;
+        line-height: 30px;
+        text-indent: 10px;
+    }
+    .uni-list li:hover{
+        background:#999;
+    }
+    .search-icon{
+        position: absolute;
+        right: 35px;
+        top: 3px;
+    }
+    .mask{
+        width:100%;
+        /*height:100%;*/
+        background:#000;
+        position: fixed;
+        left: 0px;
+        right: 0px;
+        top: 0px;
+        bottom: 0px;
+        z-index:1200;
+        opacity: 0.2;
+        /*display: none;*/
+    }
+    .alert-mask,.confirm-mask,.add-mask{
+        width:100%;
+        /*height:100%;*/
+        background:#000;
+        position: fixed;
+        left: 0px;
+        right: 0px;
+        top: 0px;
+        bottom: 0px;
+        opacity: 0.2;
+    }
+    .alert-mask{
+        z-index:10006
+        ;
+    }
+    .confirm-mask,.add-mask{
+        z-index:10000;
+    }
+    .alert-box,.confirm-box,.add-box{
+        width: 400px;
+        /* height: 300px; */
+        position: fixed;
+        margin: auto;
+        left: 0px;
+        right: 0px;
+        top: 200px;
+        /* bottom: 0px; */
+        /*z-index: 10001;*/
+        background: #fff;
+        text-align: center;
+    }
+    .alert-box{
+        z-index:10009;
+    }
+    .confirm-box,.add-box{
+        z-index:10005;
+    }
+    .alert-title{
+        width: 100%;
+        text-align: center;
+        margin-top: 30px;
+        /* height: 100px; */
+    }
+    .sure-btn,.sure-cancel{
+        display: inline-block;
+        width: 80px;
+        height: 30px;
+        line-height: 30px;
+        text-align: center;
+        border: 1px solid #ababab;
+        border-radius: 5px;
+        margin: auto;
+        margin-top: 30px;
+        margin-bottom: 30px;
+    }
+    .sure-cancel{
+        margin-left:30px;
+    }
+    .search-ctrl{
+        position: relative;
+    }
+    .search-ctrl-inp{
+        height: 30px;
+        padding-right: 28px;
+
+    }
+    .search-ctrl-btn{
+        position: absolute;
+        width: 24px;
+        height: 24px;
+        right: 2px;
+        top: 3px;
+        cursor: pointer;
+    }
+    .list-li{
+        position: relative;
+    }
+    .delete-btn{
+        display: none;
+        position: absolute;
+        /*margin-right:10px;*/
+        left:300px;
+        /*right:5px;*/
+    }
+    .add-input{
+        width:80%;
+    }
+</style>
+
+<div ng-controller="indexBdCtrl" >
+    <div class="mask" ng-show="flag"></div>
+    <div class="alert-mask" ng-show="alert"></div>
+    <div class="alert-box" ng-show="alert">
+        <div class="alert-title">{{title}}</div>
+        <div class="sure-btn cursor" ng-click="hideAlert()">确定</div>
+    </div>
+    <div class="confirm-mask" ng-show="confirm"></div>
+    <div class="confirm-box" ng-show="confirm">
+        <div class="alert-title">{{confirmtitle}}</div>
+        <div class="sure-btn cursor" data-id="deleteId" ng-click="sureDelete()">确定</div>
+        <div class="sure-cancel cursor" ng-click="hideConfirm()">取消</div>
+    </div>
+    <div class="add-mask" ng-show="add"></div>
+    <div class="add-box" ng-show="add">
+        <div class="add-title">添加学校</div>
+        <input class="add-input" ng-model='schooleName' placeholder="请输入学校名称" />
+        <div class="sure-btn cursor" ng-click="addUniversity(schooleName)">确定</div>
+        <div class="sure-cancel cursor" ng-click="hideAdd()">取消</div>
+    </div>
+    <header class="header">绘制高校地图范围</header>
+    <main class="main">
+        <div class="left-part">
+            <div class="search">
+                <span class="add-university cursor" ng-click="showAdd()">+</span>
+                <input ng-keydown="searchInp($event)" ng-model="uniName" type="text" placeholder="学校名称" class="search-input" ng-trim="true"/>
+                <img class="search-icon cursor" src="./wiki/assets/images/search.png" ng-click="searchIcon(uniName)" />
+            </div>
+            <ul class="uni-list">
+                <li on-finish-render-filters class="list-li" ng-repeat="item in items" ng-mouseout="moveout($event)" ng-mouseover="moveover($event)"
+                 latlng={{item}} ng-click="editUni($event)">{{item.schoolName}}<span ng-mouseout="out($event)" ng-click='delete($event)' ng-mouseover="over($event)" class="delete-btn cursor">X</span></li>
+            </ul>
+        </div>
+        <div class="right-part">
+            <div id="map"></div>
+        </div>
+    </main>
+</div>

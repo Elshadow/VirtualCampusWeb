@@ -5,7 +5,7 @@
 app.controller('loginCtrl', function ($scope, $rootScope, $state, $auth, Account) {
     // 判断用户是否已经登录,如果已经登录自动跳转到地图页面
     if (Account.isAuthenticated()) {
-        $state.go("index");
+        $state.go("indexBd");
     }
     // $scope.errMsg = "用户名或密码错误";
     $scope.login = function () {
@@ -23,7 +23,7 @@ app.controller('loginCtrl', function ($scope, $rootScope, $state, $auth, Account
             Account.setUser(data.userInfo);
             // console.log("登录成功,token = " + data.token);
             // 跳转地图页面
-			$state.go("index");
+			$state.go("indexBd");
         }, function (error) {
             $scope.errMsg = error.message;
         });
