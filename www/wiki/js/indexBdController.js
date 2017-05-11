@@ -118,6 +118,7 @@ app.controller('indexBdCtrl', function ($scope,$auth,Account,$state) {
       div.setAttribute("class","search-ctrl");
       var input = document.createElement("input");
       input.setAttribute("class","search-ctrl-inp");
+      input.setAttribute("maxlength", "50");
       input.type = "text";
       input.placeholder = "请输入地点";
       var button = document.createElement("img");

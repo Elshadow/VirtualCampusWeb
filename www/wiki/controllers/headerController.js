@@ -67,9 +67,11 @@ app.controller('headerCtrl', function ($scope, $state, $auth, Account, Message) 
                             southEastLat:southEast[1],
                             southEastLng:southEast[0],
                         }
+                        // 更新学校区域范围经纬度为百度经纬度
                         util.http("put", config.apiUrlPrefix + 'school', params, function (data) {
-                            // 更新学校区域范围经纬度为百度经纬度
-
+                            if (index == ($scope.schools.length - 1)) {
+                                location.reload();
+                            }
                         }, function (error) {
                             $scope.errMsg = error.message;
                         });
