@@ -23,7 +23,8 @@ app.controller('indexBdCtrl', function ($scope,$auth,Account,$state) {
     var chinaLat = 37.899050079360935;
     var chinaLng = 102.83203125;
     var map = new BMap.Map("map");  // 创建地图实例  
-    var point = new BMap.Point(chinaLng, chinaLat); // 创建点坐标  
+    var point = new BMap.Point(chinaLng, chinaLat); // 创建点坐标
+    // map.setMapStyle({style:'grassgreen'});
     map.centerAndZoom(point, 5);   // 初始化地图，设置中心点坐标和地图级别
     map.enableScrollWheelZoom(true);    //开启鼠标滚轮缩放
     var bottom_right_navigation = new BMap.NavigationControl({anchor: BMAP_ANCHOR_BOTTOM_RIGHT, type: BMAP_NAVIGATION_CONTROL_ZOOM});   //右下角，仅包含缩放按钮
@@ -177,9 +178,9 @@ app.controller('indexBdCtrl', function ($scope,$auth,Account,$state) {
     var styleOptions = {
         strokeColor:"black",    //边线颜色。
         fillColor:"orange",      //填充颜色。当参数为空时，圆形将没有填充效果。
-        strokeWeight: 3,       //边线的宽度，以像素为单位。
-        strokeOpacity: 0.8,    //边线透明度，取值范围0 - 1。
-        fillOpacity: 0.6,      //填充的透明度，取值范围0 - 1。
+        strokeWeight: 1,       //边线的宽度，以像素为单位。
+        strokeOpacity: 0.5,    //边线透明度，取值范围0 - 1。
+        fillOpacity: 0.3,      //填充的透明度，取值范围0 - 1。
         strokeStyle: 'solid' //边线的样式，solid或dashed。
     }
     //实例化鼠标绘制工具
@@ -210,13 +211,16 @@ app.controller('indexBdCtrl', function ($scope,$auth,Account,$state) {
     // 通过JavaScript的prototype属性继承于BMap.Control
     DrawControl.prototype = new BMap.Control();
 
+    // 绘制按钮
+    var btn = null;
+
     // 自定义控件必须实现自己的initialize方法,并且将控件的DOM元素返回
     // 在本方法中创建个div元素作为控件的容器,并将其添加到地图容器中
     DrawControl.prototype.initialize = function(map){
       // 创建一个DOM元素
       var div = document.createElement("div");
       div.setAttribute("class","draw");
-      var btn = document.createElement("div");
+      btn = document.createElement("div");
       btn.setAttribute("class","draw-btn");
       btn.innerText = "绘制";
       div.appendChild(btn);
@@ -254,8 +258,7 @@ app.controller('indexBdCtrl', function ($scope,$auth,Account,$state) {
                 util.http("put", config.apiUrlPrefix + 'school', params, function (data) {
                     getSchool();
                     $scope.updateFlag = false;
-                    $scope.$apply();
-                    getSchool();
+                    // $scope.$apply();
                 }, function (error) {
                     $scope.errMsg = error.message;
                 });
@@ -362,6 +365,12 @@ app.controller('indexBdCtrl', function ($scope,$auth,Account,$state) {
     }
 
     $scope.editUni = function(e){
+        // 如果当前绘制按钮状态为正在绘制，则不允许切换学校
+        if (btn != null && btn.innerText == "结束绘制") {
+            $scope.alert = true;
+            $scope.title = "当前学校尚未绘制完毕";
+            return;
+        }
         for(var i = 0;i<e.target.parentNode.children.length;i++){
             e.target.parentNode.children[i].style.background = "#eee";
         }
@@ -386,10 +395,10 @@ app.controller('indexBdCtrl', function ($scope,$auth,Account,$state) {
                 new BMap.Point(latlng.northEastLng, latlng.northEastLat),
                 new BMap.Point(latlng.southEastLng, latlng.southEastLat),
                 new BMap.Point(latlng.southWestLng, latlng.southWestLat)
-            ], {strokeColor:"black", fillColor:"orange", strokeWeight:3, strokeOpacity:0.8, fillOpacity:0.6, strokeStyle:"solid"});
+            ], {strokeColor:"black", fillColor:"orange", strokeWeight:1, strokeOpacity:0.5, fillOpacity:0.3, strokeStyle:"solid"});
             map.addOverlay(rectangle);
             var bounds = new BMap.Bounds(new BMap.Point(latlng.southWestLng, latlng.southWestLat),new BMap.Point(latlng.northEastLng, latlng.northEastLat));
-            // map.setBounds(bounds);
+            map.centerAndZoom(rectangle.getBounds().getCenter(), 15);
             // 设置lastOverlay的值
             lastOverlay = rectangle;
         }else{
@@ -397,8 +406,8 @@ app.controller('indexBdCtrl', function ($scope,$auth,Account,$state) {
             lastOverlay = null;
             // 设置可更新状态值为true
             $scope.updateFlag = true;
+            searchPosition(latlng.schoolName,true);
         }
-        searchPosition(latlng.schoolName,true);
         // 如果绘图控件不存在，则创建
         if (drawCtrl == null || typeof(drawCtrl) == "undefined") {
             // 创建控件
