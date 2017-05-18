@@ -152,27 +152,42 @@ app.controller('indexBdCtrl', function ($scope,$auth,Account,$state) {
     // 添加绘图功能实现
     var lastOverlay = null;
     var overlaycomplete = function(e){
-        if (lastOverlay != null && typeof(lastOverlay) != "undefined") {
-            // 如果新划设的矩形区域范围经纬度小于原有经纬度的话，则撤销当前所划设区域并提示
-            var old_northEast = lastOverlay.po[1];
-            var old_southWest = lastOverlay.po[3];
+        // if (lastOverlay != null && typeof(lastOverlay) != "undefined") {
+        //     // 如果新划设的矩形区域范围经纬度小于原有经纬度的话，则撤销当前所划设区域并提示
+        //     var old_northEast = lastOverlay.po[1];
+        //     var old_southWest = lastOverlay.po[3];
 
-            var new_northEast = e.overlay.po[1];
-            var new_southWest = e.overlay.po[3];
-            if (new_southWest.lng >= old_southWest.lng || new_southWest.lat >= old_southWest.lat || new_northEast.lng <= old_northEast.lng || new_northEast.lat <= old_northEast.lat) {
-                alert("新绘制矩形范围不允许小于等于原有矩形范围")
-                map.removeOverlay(e.overlay);
-            }else{
-                // 如果矩形框已经存在的情况下，则从地图上清除该矩形框
-                map.removeOverlay(lastOverlay);
-                lastOverlay = e.overlay;
-                drawingManager.close();
-            }
-        }else if ($scope.updateFlag == true) {
-            lastOverlay = e.overlay;
-        }
+        //     var new_northEast = e.overlay.po[1];
+        //     var new_southWest = e.overlay.po[3];
+        //     if (new_southWest.lng >= old_southWest.lng || new_southWest.lat >= old_southWest.lat || new_northEast.lng <= old_northEast.lng || new_northEast.lat <= old_northEast.lat) {
+        //         alert("新绘制矩形范围不允许小于等于原有矩形范围")
+        //         map.removeOverlay(e.overlay);
+        //     }else{
+        //         // 如果矩形框已经存在的情况下，则从地图上清除该矩形框
+        //         map.removeOverlay(lastOverlay);
+        //         lastOverlay = e.overlay;
+        //         drawingManager.close();
+        //     }
+        // }else if ($scope.updateFlag == true) {
+        //     lastOverlay = e.overlay;
+        // }
+        // if (lastOverlay != null) {
+            // 为覆盖物添加事件监听
+            // console.log("cd");
+            // lastOverlay.addEventListener("lineupdate", function(e){
+            //     alert("over_mouseup");
+            // });
+        // }else{
+            // lastOverlay = e.overlay;
+            // lastOverlay.addEventListener("lineupdate", function(e){
+            //     alert("ccc");
+            // });
+        // }
+        // 关闭绘制模式
+        drawingManager.close();
         // 设置矩形框可编辑
-        // e.overlay.enableEditing();
+        e.overlay.enableEditing();
+        lastOverlay = e.overlay;
         // console.log(e.overlay)
     };
     var styleOptions = {
@@ -224,12 +239,62 @@ app.controller('indexBdCtrl', function ($scope,$auth,Account,$state) {
       btn.setAttribute("class","draw-btn");
       btn.innerText = "绘制";
       div.appendChild(btn);
+      var pos = new Array();
       // 按钮绑定点击事件
       btn.onclick = function(e){
         if (btn.innerText == "绘制") {
-            // 开启绘制模式,并设置绘制模式为矩形绘制模式
-            drawingManager.open();
-            drawingManager.setDrawingMode(BMAP_DRAWING_RECTANGLE);
+            if (lastOverlay == null) {
+                // 开启绘制模式,并设置绘制模式为矩形绘制模式
+                drawingManager.open();
+                drawingManager.setDrawingMode(BMAP_DRAWING_RECTANGLE);
+            }else{
+                lastOverlay.addEventListener("lineupdate", function(e){
+                    if (pos.length == 4 && e.target.po[0].equals(pos[0]) && e.target.po[1].equals(pos[1]) && e.target.po[2].equals(pos[2]) && e.target.po[3].equals(pos[3])){
+                        return;
+                    }
+                    if (pos.length < 4){
+                        pos.push(e.target.po[0]);
+                        pos.push(e.target.po[1]);
+                        pos.push(e.target.po[2]);
+                        pos.push(e.target.po[3]);
+                    }else{
+                        pos[0] = e.target.po[0];
+                        pos[1] = e.target.po[1];
+                        pos[2] = e.target.po[2];
+                        pos[3] = e.target.po[3];
+                    }
+                    // 获取最新覆盖物区域信息
+                    var southWest = e.target.getBounds().getSouthWest();
+                    var northEast = e.target.getBounds().getNorthEast();
+
+                    var northWest = new BMap.Point(southWest.lng, northEast.lat);
+                    var southEast = new BMap.Point(northEast.lng, southWest.lat);
+
+                    var path = new Array();
+                    path.push(northWest);
+                    path.push(northEast);
+                    path.push(southEast);
+                    path.push(southWest);
+
+                    e.target.setPath(path);
+                    lastOverlay = e.target;
+                    
+                    // var newRect = new BMap.Polygon([
+                    //     new BMap.Point(southWest.lng, northEast.lat),
+                    //     new BMap.Point(northEast.lng, northEast.lat),
+                    //     new BMap.Point(northEast.lng, southWest.lat),
+                    //     new BMap.Point(southWest.lng, southWest.lat)
+                    // ], {strokeColor:"black", fillColor:"orange", strokeWeight:1, strokeOpacity:0.5, fillOpacity:0.3, strokeStyle:"solid"});
+                    // map.addOverlay(newRect);
+                    // newRect.enableEditing();
+                    // map.centerAndZoom(newRect.getBounds().getCenter(), 15);
+                    // // 删除原有覆盖物，根据新的bounds重新绘制矩形区域
+                    // map.removeOverlay(lastOverlay);
+                    // // 设置lastOverlay的值
+                    // lastOverlay = newRect;
+                });
+                lastOverlay.enableEditing();
+            }
             btn.innerText = "结束绘制";
         }else{
             // 关闭绘制模式
@@ -237,6 +302,11 @@ app.controller('indexBdCtrl', function ($scope,$auth,Account,$state) {
             btn.innerText = "绘制";
             // 更新学校区域范围四个顶点经纬度信息
             if(lastOverlay || $scope.updateFlag == true){
+                if (lastOverlay) {
+                    // lastOverlay.removeEventListener("lineupdate", function(e){});
+                    // 关闭编辑模式
+                    lastOverlay.disableEditing();
+                }
                 // console.log(lastOverlay.po)
                 // 0 1 2 3对应左上 右上 右下 左下四个顶点经纬度
                 var northWest = lastOverlay.po[0];
@@ -342,6 +412,7 @@ app.controller('indexBdCtrl', function ($scope,$auth,Account,$state) {
                         }
                         angular.element(curTag).triggerHandler('click',curTag);
                         $scope.add = false;
+                        $scope.schooleName = '';
                     });
             }, function (error) {
                 $scope.errMsg = error.message;
