@@ -14,6 +14,9 @@ app.config(function ($stateProvider, $urlRouterProvider) {
     }).state('index', {
         url:"/index",
         templateUrl:templatePath + 'index.html'
+    }).state('indexBd', {
+        url:"/indexBd",
+        templateUrl:templatePath + 'indexbd.html'
     });
 });
 

@@ -11,6 +11,7 @@
     <link href="/wiki/plugins/ui-select/select.css" rel="stylesheet" >
     <link href="/wiki/plugins/cropper/cropper.min.css">
 	<link href="/wiki/plugins/leaflet/leaflet.css" rel="stylesheet">
+    <link rel="stylesheet" href="http://api.map.baidu.com/library/DrawingManager/1.4/src/DrawingManager_min.css" />
 
     <!-- plugin js -->
     <script src="/wiki/plugins/jquery/jquery.min.js"></script>
@@ -25,6 +26,9 @@
     <script src="/wiki/plugins/angular-sanitize/angular-sanitize.min.js"></script>
     <script src="/wiki/plugins/ui-select/select.js"></script>
     <script src="/wiki/plugins/leaflet/leaflet-src.js"></script>
+    <script src="http://api.map.baidu.com/api?v=2.0&ak=E5WMdPfGhhrlsOpfFUKHHGCmS1zhbZGf" type="text/javascript"></script>
+    <!--加载鼠标绘制工具-->
+    <script type="text/javascript" src="http://api.map.baidu.com/library/DrawingManager/1.4/src/DrawingManager_min.js"></script>
     <!-- <script type="text/javascript" src="/wiki/plugins/index.js"></script> -->
     <!--script src="/wiki/plugins/requirejs/require.js"></script-->
 	<!-- 用户页显示需解析md --->
@@ -46,6 +50,9 @@
     <script src="/wiki/js/userController.js"></script>
     <script src="/wiki/js/authController.js"></script>
 	<script src="/wiki/js/indexController.js"></script>
+    <script src="/wiki/js/indexBdController.js"></script>
+    <!-- 百度坐标（BD09）、国测局坐标（火星坐标，GCJ02）、和WGS84坐标系之间的转换 -->
+    <script src="/wiki/js/coordtransform.js"></script>
 </head>
 
 <body>
