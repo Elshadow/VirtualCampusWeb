@@ -157,7 +157,7 @@ body{
         opacity: 0.2;
         /*display: none;*/
     }
-    .alert-mask,.confirm-mask,.add-mask{
+    .alert-mask,.confirm-mask,.add-mask,.save-mask{
         width:100%;
         /*height:100%;*/
         background:#000;
@@ -172,10 +172,13 @@ body{
         z-index:10006
         ;
     }
+    .save-mask{
+        z-index:10005;
+    }
     .confirm-mask,.add-mask{
         z-index:10000;
     }
-    .alert-box,.confirm-box,.add-box{
+    .alert-box,.confirm-box,.add-box,.save-box{
         width: 400px;
         /* height: 300px; */
         position: fixed;
@@ -193,6 +196,9 @@ body{
     }
     .confirm-box,.add-box{
         z-index:10005;
+    }
+    .save-box{
+        z-index:10006;
     }
     .alert-title{
         width: 100%;
@@ -258,6 +264,12 @@ body{
         <div class="alert-title">{{confirmtitle}}</div>
         <div class="sure-btn cursor" data-id="deleteId" ng-click="sureDelete()">确定</div>
         <div class="sure-cancel cursor" ng-click="hideConfirm()">取消</div>
+    </div>
+    <div class="save-mask" ng-show="save"></div>
+    <div class="save-box" ng-show="save">
+        <div class="alert-title">{{saveTitle}}</div>
+        <div class="sure-btn cursor" data-id="deleteId" ng-click="sureSave()">确定</div>
+        <div class="sure-cancel cursor" ng-click="hideSave()">取消</div>
     </div>
     <div class="add-mask" ng-show="add"></div>
     <div class="add-box" ng-show="add">

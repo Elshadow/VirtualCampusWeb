@@ -11,6 +11,9 @@ app.controller('indexBdCtrl', function ($scope,$auth,Account,$state) {
     $scope.currentName=[];
     $scope.title = "";
     $scope.confirmtitle = "";
+    $scope.save = false;
+    $scope.saveTitle = '确认保留修改?';
+    $scope.curId = null;
     var city = "";
     $scope.curPosition = {};
     var lastOverlay = null;
@@ -172,7 +175,7 @@ app.controller('indexBdCtrl', function ($scope,$auth,Account,$state) {
             curRt = new BMap.Point(ne.lng,ne.lat);
             curRb = new BMap.Point(ne.lng,e.point.lat);
             if($scope.curPosition.leftBottom.lng>=e.point.lng&&$scope.curPosition.leftBottom.lat>=e.point.lat){
-                pathArr = [curLb,curLt,curRt,curRb];
+                pathArr = [curLt,curRt,curRb,curLb];
 
                 drawPath(pathArr);
                 ltMarker.setPosition(curLt);
@@ -192,7 +195,7 @@ app.controller('indexBdCtrl', function ($scope,$auth,Account,$state) {
             curRt = new BMap.Point(ne.lng,e.point.lat);
             curRb = new BMap.Point(ne.lng,sw.lat);
             if($scope.curPosition.leftBottom.lng>=e.point.lng&&$scope.curPosition.rightTop.lat<=e.point.lat){
-                pathArr = [curLb,curLt,curRt,curRb];
+                pathArr = [curLt,curRt,curRb,curLb];
 
                 drawPath(pathArr);
                 lbMarker.setPosition(curLb);
@@ -211,7 +214,7 @@ app.controller('indexBdCtrl', function ($scope,$auth,Account,$state) {
             curRt = new BMap.Point(e.point.lng,e.point.lat);
             curRb = new BMap.Point(e.point.lng,sw.lat);
             if($scope.curPosition.rightTop.lng<=e.point.lng&&$scope.curPosition.rightTop.lat<=e.point.lat){
-                pathArr = [curLb,curLt,curRt,curRb];
+                pathArr = [curLt,curRt,curRb,curLb];
 
                 drawPath(pathArr);
                 lbMarker.setPosition(curLb);
@@ -230,7 +233,7 @@ app.controller('indexBdCtrl', function ($scope,$auth,Account,$state) {
             curRt = new BMap.Point(e.point.lng,ne.lat);
             curRb = new BMap.Point(e.point.lng,e.point.lat);
             if($scope.curPosition.rightTop.lng<=e.point.lng&&$scope.curPosition.leftBottom.lat>=e.point.lat){
-                pathArr = [curLb,curLt,curRt,curRb];
+                pathArr = [curLt,curRt,curRb,curLb];
 
                 drawPath(pathArr);
                 lbMarker.setPosition(curLb);
@@ -292,7 +295,7 @@ app.controller('indexBdCtrl', function ($scope,$auth,Account,$state) {
             ltMarker.setPosition(curLt);
             rtMarker.setPosition(curRt);
         }
-        pathArr = [curLb,curLt,curRt,curRb];
+        pathArr = [curLt,curRt,curRb,curLb];
         drawPath(pathArr);
 
     }
@@ -522,47 +525,11 @@ app.controller('indexBdCtrl', function ($scope,$auth,Account,$state) {
             btn.innerText = "结束绘制";
         }else{
             // 关闭绘制模式
+            $scope.save = true;
+            $scope.$apply();
+
             drawingManager.close();
-            btn.innerText = "绘制";
-            map.removeOverlay(lbMarker);
-            map.removeOverlay(ltMarker);
-            map.removeOverlay(rbMarker);
-            map.removeOverlay(rtMarker);
-            // 更新学校区域范围四个顶点经纬度信息
-            if(lastOverlay || $scope.updateFlag == true){
-                if (lastOverlay) {
-                    // lastOverlay.removeEventListener("lineupdate", function(e){});
-                    // 关闭编辑模式
-                    lastOverlay.disableEditing();
-                }
-                // console.log(lastOverlay.po)
-                // 0 1 2 3对应左上 右上 右下 左下四个顶点经纬度
-                var northWest = lastOverlay.po[0];
-                var northEast = lastOverlay.po[1];
-                var southEast = lastOverlay.po[2];
-                var southWest = lastOverlay.po[3];
-                var params = {
-                    schoolName: $scope.schoolName,
-                    _id: $scope.id,
-                    northWestLat: northWest.lat,
-                    norhtWestLng: northWest.lng,
-                    northEastLat: northEast.lat,
-                    northEastLng: northEast.lng,
-                    southWestLat: southWest.lat,
-                    southWestLng: southWest.lng,
-                    southEastLat: southEast.lat,
-                    southEastLng: southEast.lng,
-                }
-                util.http("put", config.apiUrlPrefix + 'school', params, function (data) {
-                    getSchool();
-                    $scope.updateFlag = false;
-                    // $scope.$apply();
-                }, function (error) {
-                    $scope.errMsg = error.message;
-                });
-            }else{
-                $scope.$apply();
-            }
+            
         }
       }
       // 添加DOM元素到地图中
@@ -752,12 +719,12 @@ app.controller('indexBdCtrl', function ($scope,$auth,Account,$state) {
     }
     $scope.moveover = function(e){
         // e.stopPropagation();
-        e.target.children[0].style.display = 'inline';
+        e.target.children[0]?(e.target.children[0].style.display = 'inline'):(e.target.style.display = 'inline')
 
     }
     $scope.moveout = function(e){
         // e.stopPropagation();
-        e.target.children[0].style.display = 'none';
+        e.target.children[0]?(e.target.children[0].style.display = 'none'):(e.target.style.display = 'none')
     }
     $scope.over = function(e){
         // e.stopPropagation();
@@ -792,5 +759,68 @@ app.controller('indexBdCtrl', function ($scope,$auth,Account,$state) {
     }
     $scope.hideConfirm = function(){
         $scope.confirm = false;
+    }
+    $scope.sureSave = function(){
+        document.getElementsByClassName('draw-btn')[0].innerText = "绘制";
+            map.removeOverlay(lbMarker);
+            map.removeOverlay(ltMarker);
+            map.removeOverlay(rbMarker);
+            map.removeOverlay(rtMarker);
+            // 更新学校区域范围四个顶点经纬度信息
+            if(lastOverlay || $scope.updateFlag == true){
+                if (lastOverlay) {
+                    // lastOverlay.removeEventListener("lineupdate", function(e){});
+                    // 关闭编辑模式
+                    lastOverlay.disableEditing();
+                }
+                // console.log(lastOverlay.po)
+                // 0 1 2 3对应左上 右上 右下 左下四个顶点经纬度
+                var northWest = lastOverlay.po[0];
+                var northEast = lastOverlay.po[1];
+                var southEast = lastOverlay.po[2];
+                var southWest = lastOverlay.po[3];
+                var params = {
+                    schoolName: $scope.schoolName,
+                    _id: $scope.id,
+                    northWestLat: northWest.lat,
+                    norhtWestLng: northWest.lng,
+                    northEastLat: northEast.lat,
+                    northEastLng: northEast.lng,
+                    southWestLat: southWest.lat,
+                    southWestLng: southWest.lng,
+                    southEastLat: southEast.lat,
+                    southEastLng: southEast.lng,
+                }
+                util.http("put", config.apiUrlPrefix + 'school', params, function (data) {
+                    getSchool();
+                    $scope.updateFlag = false;
+
+                    // $scope.$apply();
+                }, function (error) {
+                    $scope.errMsg = error.message;
+                });
+            }else{
+                $scope.$apply();
+            }
+            $scope.save = false;
+
+    }
+    $scope.hideSave = function(){
+        document.getElementsByClassName('draw-btn')[0].innerText = "绘制";
+        map.removeOverlay(lbMarker);
+        map.removeOverlay(ltMarker);
+        map.removeOverlay(rbMarker);
+        map.removeOverlay(rtMarker);
+        var sw = $scope.curPosition.leftBottom;
+        var ne = $scope.curPosition.rightTop;
+        var lt = new BMap.Point(sw.lng,ne.lat)
+        var lb = new BMap.Point(sw.lng,sw.lat)
+        var rt = new BMap.Point(ne.lng,ne.lat)
+        var rb = new BMap.Point(ne.lng,sw.lat)
+        var arr = [lt,rt,rb,lb]
+        lastOverlay.setPath(arr);
+
+        $scope.save = false;
+        
     }
 });
