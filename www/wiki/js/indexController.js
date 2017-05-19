@@ -540,12 +540,12 @@ app.controller('indexCtrl', function ($scope,$auth,Account,$state) {
     }
     $scope.moveover = function(e){
         // e.stopPropagation();
-        e.target.children[0].style.display = 'inline';
+        e.target.children[0]?(e.target.children[0].style.display = 'inline'):(e.target.style.display = 'inline')
 
     }
     $scope.moveout = function(e){
         // e.stopPropagation();
-        e.target.children[0].style.display = 'none';
+        e.target.children[0]?(e.target.children[0].style.display = 'none'):(e.target.style.display = 'none')
     }
     $scope.over = function(e){
         // e.stopPropagation();
