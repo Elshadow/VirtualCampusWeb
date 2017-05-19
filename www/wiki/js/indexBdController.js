@@ -12,6 +12,8 @@ app.controller('indexBdCtrl', function ($scope,$auth,Account,$state) {
     $scope.title = "";
     $scope.confirmtitle = "";
     var city = "";
+    $scope.curPosition = {};
+    var lastOverlay = null;
     // $scope.delete = false;
     if (!Account.isAuthenticated()) {
         $state.go("login");
@@ -30,7 +32,11 @@ app.controller('indexBdCtrl', function ($scope,$auth,Account,$state) {
     var bottom_right_navigation = new BMap.NavigationControl({anchor: BMAP_ANCHOR_BOTTOM_RIGHT, type: BMAP_NAVIGATION_CONTROL_ZOOM});   //右下角，仅包含缩放按钮
     // 添加缩放按钮控件
     map.addControl(bottom_right_navigation);
+    var myIcon = new BMap.Icon("./wiki/assets/images/rec.png", new BMap.Size(10,10),{
+        anchor:new BMap.Size(5,5)
+    });
 
+    var lb,lt,rb,rt,lbMarker,rbMarker,ltMarker,rtMarker,markerObj=[];
     // 添加定位控件
     // var geolocationControl = new BMap.GeolocationControl();
     // geolocationControl.addEventListener("locationSuccess", function(e){
@@ -102,7 +108,7 @@ app.controller('indexBdCtrl', function ($scope,$auth,Account,$state) {
     // map.addOverlay(vectorMarker);
 
     // 定义一个搜索控件类,即function
-    function SearchControl(){
+    function SearchControl(){ 
         // 默认停靠位置和偏移量
         this.defaultAnchor = BMAP_ANCHOR_TOP_LEFT;
         this.defaultOffset = new BMap.Size(10, 10);
@@ -148,9 +154,167 @@ app.controller('indexBdCtrl', function ($scope,$auth,Account,$state) {
     var searchCtrl = new SearchControl();
     // 添加到地图当中
     map.addControl(searchCtrl);
+    // 绘制地图
+    function drawPath(arr){
+        lastOverlay.setPath(arr);
+        lbMarker.setPosition(arr[0]);
+        ltMarker.setPosition(arr[1]);
+        rtMarker.setPosition(arr[2]);
+        rbMarker.setPosition(arr[3]);
+    }
+    //编辑计算坐标
+    function move(e){
+        var sw = lastOverlay.getBounds().getSouthWest();
+        var ne = lastOverlay.getBounds().getNorthEast();
+        var curba = e.target.ba;
+        var curLb,curLt,curRt,curRb;
+        if(curba == markerObj.lbMarker){
+            console.log('左下')
+            curLb = new BMap.Point(e.point.lng,e.point.lat);
+            curLt = new BMap.Point(e.point.lng,ne.lat);
+            curRt = new BMap.Point(ne.lng,ne.lat);
+            curRb = new BMap.Point(ne.lng,e.point.lat);
+            if($scope.curPosition.leftBottom.lng>=e.point.lng&&$scope.curPosition.leftBottom.lat>=e.point.lat){
+                pathArr = [curLb,curLt,curRt,curRb];
 
+                drawPath(pathArr);
+            }else{
+                var sw = lastOverlay.getBounds().getSouthWest();
+                var ne = lastOverlay.getBounds().getNorthEast();
+                lbMarker.setPosition(sw);
+            }
+
+        }else if(curba == markerObj.ltMarker){
+            console.log('左上')
+            // pathArr = [pt1,new BMap.Point(e.point.lng,e.point.lat),pt3,pt4];.
+            curLb = new BMap.Point(e.point.lng,sw.lat);
+            curLt = new BMap.Point(e.point.lng,e.point.lat);
+            curRt = new BMap.Point(ne.lng,e.point.lat);
+            curRb = new BMap.Point(ne.lng,sw.lat);
+            if($scope.curPosition.leftBottom.lng>=e.point.lng&&$scope.curPosition.rightTop.lat<=e.point.lat){
+                pathArr = [curLb,curLt,curRt,curRb];
+
+                drawPath(pathArr);
+            }else{
+                var ne = lastOverlay.getBounds().getNorthEast();
+                var sw = lastOverlay.getBounds().getSouthWest();
+                ltMarker.setPosition(new BMap.Point(sw.lng,ne.lat));
+            }
+        }else if(curba == markerObj.rtMarker){
+            console.log('右上')
+            // pathArr = [pt1,pt2,new BMap.Point(e.point.lng,e.point.lat),pt4];
+            curLb = new BMap.Point(sw.lng,sw.lat);
+            curLt = new BMap.Point(sw.lng,e.point.lat);
+            curRt = new BMap.Point(e.point.lng,e.point.lat);
+            curRb = new BMap.Point(e.point.lng,sw.lat);
+            if($scope.curPosition.rightTop.lng<=e.point.lng&&$scope.curPosition.rightTop.lat<=e.point.lat){
+                pathArr = [curLb,curLt,curRt,curRb];
+
+                drawPath(pathArr);
+            }else{
+                var ne = lastOverlay.getBounds().getNorthEast();
+                var sw = lastOverlay.getBounds().getSouthWest();
+                rtMarker.setPosition(ne);
+            }
+        }else if(curba == markerObj.rbMarker){
+            console.log('右下')
+            // pathArr = [pt1,pt2,pt3,new BMap.Point(e.point.lng,e.point.lat)];
+            curLb = new BMap.Point(sw.lng,e.point.lat);
+            curLt = new BMap.Point(sw.lng,ne.lat);
+            curRt = new BMap.Point(e.point.lng,ne.lat);
+            curRb = new BMap.Point(e.point.lng,e.point.lat);
+            if($scope.curPosition.rightTop.lng<=e.point.lng&&$scope.curPosition.leftBottom.lat>=e.point.lat){
+                pathArr = [curLb,curLt,curRt,curRb];
+
+                drawPath(pathArr);
+            }else{
+                var ne = lastOverlay.getBounds().getNorthEast();
+                var sw = lastOverlay.getBounds().getSouthWest();
+                rbMarker.setPosition(new BMap.Point(ne.lng,sw.lat));
+            }
+        }
+
+    }
+    //新增-计算坐标
+    function setMove(e){
+        // console.log(e);
+        var sw = lastOverlay.getBounds().getSouthWest();
+        var ne = lastOverlay.getBounds().getNorthEast();
+        var curba = e.target.ba;
+        var curLb,curLt,curRt,curRb;
+        if(curba == markerObj.lbMarker){
+            console.log('左下')
+            curLb = new BMap.Point(e.point.lng,e.point.lat);
+            curLt = new BMap.Point(e.point.lng,ne.lat);
+            curRt = new BMap.Point(ne.lng,ne.lat);
+            curRb = new BMap.Point(ne.lng,e.point.lat);
+
+        }else if(curba == markerObj.ltMarker){
+            console.log('左上')
+            // pathArr = [pt1,new BMap.Point(e.point.lng,e.point.lat),pt3,pt4];.
+            curLb = new BMap.Point(e.point.lng,sw.lat);
+            curLt = new BMap.Point(e.point.lng,e.point.lat);
+            curRt = new BMap.Point(ne.lng,e.point.lat);
+            curRb = new BMap.Point(ne.lng,sw.lat);
+        }else if(curba == markerObj.rtMarker){
+            console.log('右上')
+            // pathArr = [pt1,pt2,new BMap.Point(e.point.lng,e.point.lat),pt4];
+            curLb = new BMap.Point(sw.lng,sw.lat);
+            curLt = new BMap.Point(sw.lng,e.point.lat);
+            curRt = new BMap.Point(e.point.lng,e.point.lat);
+            curRb = new BMap.Point(e.point.lng,sw.lat);
+        }else if(curba == markerObj.rbMarker){
+            console.log('右下')
+            // pathArr = [pt1,pt2,pt3,new BMap.Point(e.point.lng,e.point.lat)];
+            curLb = new BMap.Point(sw.lng,e.point.lat);
+            curLt = new BMap.Point(sw.lng,ne.lat);
+            curRt = new BMap.Point(e.point.lng,ne.lat);
+            curRb = new BMap.Point(e.point.lng,e.point.lat);
+        }
+        pathArr = [curLb,curLt,curRt,curRb];
+        drawPath(pathArr);
+
+    }
+    function setMarker(lastOverlay,flag){
+        //flag为true为新增矩形设置marker,为false为编辑矩形设置marker
+        var southWest = lastOverlay.getBounds().getSouthWest();
+        var northEast = lastOverlay.getBounds().getNorthEast();
+        lb = new BMap.Point(southWest.lng,southWest.lat);//左下
+        lt = new BMap.Point(southWest.lng,northEast.lat);//左上
+        rt = new BMap.Point(northEast.lng,northEast.lat);//右上
+        rb = new BMap.Point(northEast.lng,southWest.lat);//右下
+        lbMarker = new BMap.Marker(lb,{icon:myIcon,enableDragging:true,zIndex:996});
+        lbMarker.setZIndex(996)
+        ltMarker = new BMap.Marker(lt,{icon:myIcon,enableDragging:true,zIndex:997});
+        ltMarker.setZIndex(997)
+        rbMarker = new BMap.Marker(rb,{icon:myIcon,enableDragging:true,zIndex:998});
+        rbMarker.setZIndex(999)
+        rtMarker = new BMap.Marker(rt,{icon:myIcon,enableDragging:true,zIndex:999});
+        rtMarker.setZIndex(998)
+        if(flag){
+            lbMarker.addEventListener("dragging",setMove);
+            ltMarker.addEventListener("dragging",setMove);  
+            rbMarker.addEventListener("dragging",setMove);  
+            rtMarker.addEventListener("dragging",setMove);
+        }else{
+            lbMarker.addEventListener("dragging",move);
+            ltMarker.addEventListener("dragging",move);  
+            rbMarker.addEventListener("dragging",move);  
+            rtMarker.addEventListener("dragging",move);
+        }
+          
+        map.addOverlay(lbMarker); 
+        map.addOverlay(ltMarker); 
+        map.addOverlay(rbMarker); 
+        map.addOverlay(rtMarker);
+        markerObj = {
+            lbMarker:lbMarker.ba,
+            ltMarker:ltMarker.ba,
+            rbMarker:rbMarker.ba,
+            rtMarker:rtMarker.ba
+        }
+    }
     // 添加绘图功能实现
-    var lastOverlay = null;
     var overlaycomplete = function(e){
         // if (lastOverlay != null && typeof(lastOverlay) != "undefined") {
         //     // 如果新划设的矩形区域范围经纬度小于原有经纬度的话，则撤销当前所划设区域并提示
@@ -185,9 +349,41 @@ app.controller('indexBdCtrl', function ($scope,$auth,Account,$state) {
         // }
         // 关闭绘制模式
         drawingManager.close();
+       
+
         // 设置矩形框可编辑
-        e.overlay.enableEditing();
+        // e.overlay.enableEditing();
         lastOverlay = e.overlay;
+        setMarker(lastOverlay,true);//设置可拖动的marker编辑矩形框
+
+        // var southWest = lastOverlay.getBounds().getSouthWest();
+        // var northEast = lastOverlay.getBounds().getNorthEast();
+        // lb = new BMap.Point(southWest.lng,southWest.lat);//左下
+        // lt = new BMap.Point(southWest.lng,northEast.lat);//左上
+        // rt = new BMap.Point(northEast.lng,northEast.lat);//右上
+        // rb = new BMap.Point(northEast.lng,southWest.lat);//右下
+        // lbMarker = new BMap.Marker(lb,{icon:myIcon,enableDragging:true,zIndex:996});
+        // lbMarker.setZIndex(996)
+        // ltMarker = new BMap.Marker(lt,{icon:myIcon,enableDragging:true,zIndex:997});
+        // ltMarker.setZIndex(997)
+        // rbMarker = new BMap.Marker(rb,{icon:myIcon,enableDragging:true,zIndex:998});
+        // rbMarker.setZIndex(999)
+        // rtMarker = new BMap.Marker(rt,{icon:myIcon,enableDragging:true,zIndex:999});
+        // rtMarker.setZIndex(998)
+        // lbMarker.addEventListener("dragging",setMove);
+        // ltMarker.addEventListener("dragging",setMove);  
+        // rbMarker.addEventListener("dragging",setMove);  
+        // rtMarker.addEventListener("dragging",setMove);  
+        // map.addOverlay(lbMarker); 
+        // map.addOverlay(ltMarker); 
+        // map.addOverlay(rbMarker); 
+        // map.addOverlay(rtMarker);
+        // markerObj = {
+        //     lbMarker:lbMarker.ba,
+        //     ltMarker:ltMarker.ba,
+        //     rbMarker:rbMarker.ba,
+        //     rtMarker:rtMarker.ba
+        // }
         // console.log(e.overlay)
     };
     var styleOptions = {
@@ -215,7 +411,9 @@ app.controller('indexBdCtrl', function ($scope,$auth,Account,$state) {
     });  
      //添加鼠标绘制工具监听事件，用于获取绘制结果
     drawingManager.addEventListener('overlaycomplete', overlaycomplete);
-
+    map.addEventListener('click',function(e){
+        console.log(11111)
+    })
     // 定义一个绘制矩形控件类,即function
     function DrawControl(){
         // 默认停靠位置和偏移量
@@ -248,58 +446,67 @@ app.controller('indexBdCtrl', function ($scope,$auth,Account,$state) {
                 drawingManager.open();
                 drawingManager.setDrawingMode(BMAP_DRAWING_RECTANGLE);
             }else{
-                lastOverlay.addEventListener("lineupdate", function(e){
-                    if (pos.length == 4 && e.target.po[0].equals(pos[0]) && e.target.po[1].equals(pos[1]) && e.target.po[2].equals(pos[2]) && e.target.po[3].equals(pos[3])){
-                        return;
-                    }
-                    if (pos.length < 4){
-                        pos.push(e.target.po[0]);
-                        pos.push(e.target.po[1]);
-                        pos.push(e.target.po[2]);
-                        pos.push(e.target.po[3]);
-                    }else{
-                        pos[0] = e.target.po[0];
-                        pos[1] = e.target.po[1];
-                        pos[2] = e.target.po[2];
-                        pos[3] = e.target.po[3];
-                    }
-                    // 获取最新覆盖物区域信息
-                    var southWest = e.target.getBounds().getSouthWest();
-                    var northEast = e.target.getBounds().getNorthEast();
+    
+                $scope.curPosition.leftBottom = lastOverlay.getBounds().getSouthWest();
+                $scope.curPosition.rightTop = lastOverlay.getBounds().getNorthEast();
+                setMarker(lastOverlay,false);
 
-                    var northWest = new BMap.Point(southWest.lng, northEast.lat);
-                    var southEast = new BMap.Point(northEast.lng, southWest.lat);
+                // lastOverlay.addEventListener("lineupdate", function(e){
+                //     if (pos.length == 4 && e.target.po[0].equals(pos[0]) && e.target.po[1].equals(pos[1]) && e.target.po[2].equals(pos[2]) && e.target.po[3].equals(pos[3])){
+                //         return;
+                //     }
+                //     if (pos.length < 4){
+                //         pos.push(e.target.po[0]);
+                //         pos.push(e.target.po[1]);
+                //         pos.push(e.target.po[2]);
+                //         pos.push(e.target.po[3]);
+                //     }else{
+                //         pos[0] = e.target.po[0];
+                //         pos[1] = e.target.po[1];
+                //         pos[2] = e.target.po[2];
+                //         pos[3] = e.target.po[3];
+                //     }
+                //     // 获取最新覆盖物区域信息
+                //     var southWest = e.target.getBounds().getSouthWest();
+                //     var northEast = e.target.getBounds().getNorthEast();
 
-                    var path = new Array();
-                    path.push(northWest);
-                    path.push(northEast);
-                    path.push(southEast);
-                    path.push(southWest);
+                //     var northWest = new BMap.Point(southWest.lng, northEast.lat);
+                //     var southEast = new BMap.Point(northEast.lng, southWest.lat);
 
-                    e.target.setPath(path);
-                    lastOverlay = e.target;
+                //     var path = new Array();
+                //     path.push(northWest);
+                //     path.push(northEast);
+                //     path.push(southEast);
+                //     path.push(southWest);
+
+                //     e.target.setPath(path);
+                //     lastOverlay = e.target;
                     
-                    // var newRect = new BMap.Polygon([
-                    //     new BMap.Point(southWest.lng, northEast.lat),
-                    //     new BMap.Point(northEast.lng, northEast.lat),
-                    //     new BMap.Point(northEast.lng, southWest.lat),
-                    //     new BMap.Point(southWest.lng, southWest.lat)
-                    // ], {strokeColor:"black", fillColor:"orange", strokeWeight:1, strokeOpacity:0.5, fillOpacity:0.3, strokeStyle:"solid"});
-                    // map.addOverlay(newRect);
-                    // newRect.enableEditing();
-                    // map.centerAndZoom(newRect.getBounds().getCenter(), 15);
-                    // // 删除原有覆盖物，根据新的bounds重新绘制矩形区域
-                    // map.removeOverlay(lastOverlay);
-                    // // 设置lastOverlay的值
-                    // lastOverlay = newRect;
-                });
-                lastOverlay.enableEditing();
+                //     // var newRect = new BMap.Polygon([
+                //     //     new BMap.Point(southWest.lng, northEast.lat),
+                //     //     new BMap.Point(northEast.lng, northEast.lat),
+                //     //     new BMap.Point(northEast.lng, southWest.lat),
+                //     //     new BMap.Point(southWest.lng, southWest.lat)
+                //     // ], {strokeColor:"black", fillColor:"orange", strokeWeight:1, strokeOpacity:0.5, fillOpacity:0.3, strokeStyle:"solid"});
+                //     // map.addOverlay(newRect);
+                //     // newRect.enableEditing();
+                //     // map.centerAndZoom(newRect.getBounds().getCenter(), 15);
+                //     // // 删除原有覆盖物，根据新的bounds重新绘制矩形区域
+                //     // map.removeOverlay(lastOverlay);
+                //     // // 设置lastOverlay的值
+                //     // lastOverlay = newRect;
+                // });
+                // lastOverlay.enableEditing();
             }
             btn.innerText = "结束绘制";
         }else{
             // 关闭绘制模式
             drawingManager.close();
             btn.innerText = "绘制";
+            map.removeOverlay(lbMarker);
+            map.removeOverlay(ltMarker);
+            map.removeOverlay(rbMarker);
+            map.removeOverlay(rtMarker);
             // 更新学校区域范围四个顶点经纬度信息
             if(lastOverlay || $scope.updateFlag == true){
                 if (lastOverlay) {
