@@ -157,10 +157,7 @@ app.controller('indexBdCtrl', function ($scope,$auth,Account,$state) {
     // 绘制地图
     function drawPath(arr){
         lastOverlay.setPath(arr);
-        lbMarker.setPosition(arr[0]);
-        ltMarker.setPosition(arr[1]);
-        rtMarker.setPosition(arr[2]);
-        rbMarker.setPosition(arr[3]);
+       
     }
     //编辑计算坐标
     function move(e){
@@ -178,6 +175,9 @@ app.controller('indexBdCtrl', function ($scope,$auth,Account,$state) {
                 pathArr = [curLb,curLt,curRt,curRb];
 
                 drawPath(pathArr);
+                ltMarker.setPosition(curLt);
+                rbMarker.setPosition(curRb);
+                rtMarker.setPosition(curRt);
             }else{
                 var sw = lastOverlay.getBounds().getSouthWest();
                 var ne = lastOverlay.getBounds().getNorthEast();
@@ -195,6 +195,9 @@ app.controller('indexBdCtrl', function ($scope,$auth,Account,$state) {
                 pathArr = [curLb,curLt,curRt,curRb];
 
                 drawPath(pathArr);
+                lbMarker.setPosition(curLb);
+                rbMarker.setPosition(curRb);
+                rtMarker.setPosition(curRt);
             }else{
                 var ne = lastOverlay.getBounds().getNorthEast();
                 var sw = lastOverlay.getBounds().getSouthWest();
@@ -211,6 +214,9 @@ app.controller('indexBdCtrl', function ($scope,$auth,Account,$state) {
                 pathArr = [curLb,curLt,curRt,curRb];
 
                 drawPath(pathArr);
+                lbMarker.setPosition(curLb);
+                ltMarker.setPosition(curLt);
+                rbMarker.setPosition(curRb);
             }else{
                 var ne = lastOverlay.getBounds().getNorthEast();
                 var sw = lastOverlay.getBounds().getSouthWest();
@@ -227,6 +233,9 @@ app.controller('indexBdCtrl', function ($scope,$auth,Account,$state) {
                 pathArr = [curLb,curLt,curRt,curRb];
 
                 drawPath(pathArr);
+                lbMarker.setPosition(curLb);
+                ltMarker.setPosition(curLt);
+                rtMarker.setPosition(curRt);
             }else{
                 var ne = lastOverlay.getBounds().getNorthEast();
                 var sw = lastOverlay.getBounds().getSouthWest();
@@ -248,6 +257,9 @@ app.controller('indexBdCtrl', function ($scope,$auth,Account,$state) {
             curLt = new BMap.Point(e.point.lng,ne.lat);
             curRt = new BMap.Point(ne.lng,ne.lat);
             curRb = new BMap.Point(ne.lng,e.point.lat);
+            ltMarker.setPosition(curLt);
+            rbMarker.setPosition(curRb);
+            rtMarker.setPosition(curRt);
 
         }else if(curba == markerObj.ltMarker){
             console.log('左上')
@@ -256,6 +268,9 @@ app.controller('indexBdCtrl', function ($scope,$auth,Account,$state) {
             curLt = new BMap.Point(e.point.lng,e.point.lat);
             curRt = new BMap.Point(ne.lng,e.point.lat);
             curRb = new BMap.Point(ne.lng,sw.lat);
+            lbMarker.setPosition(curLb);
+            rbMarker.setPosition(curRb);
+            rtMarker.setPosition(curRt);
         }else if(curba == markerObj.rtMarker){
             console.log('右上')
             // pathArr = [pt1,pt2,new BMap.Point(e.point.lng,e.point.lat),pt4];
@@ -263,6 +278,9 @@ app.controller('indexBdCtrl', function ($scope,$auth,Account,$state) {
             curLt = new BMap.Point(sw.lng,e.point.lat);
             curRt = new BMap.Point(e.point.lng,e.point.lat);
             curRb = new BMap.Point(e.point.lng,sw.lat);
+            lbMarker.setPosition(curLb);
+            ltMarker.setPosition(curLt);
+            rbMarker.setPosition(curRb);
         }else if(curba == markerObj.rbMarker){
             console.log('右下')
             // pathArr = [pt1,pt2,pt3,new BMap.Point(e.point.lng,e.point.lat)];
@@ -270,6 +288,9 @@ app.controller('indexBdCtrl', function ($scope,$auth,Account,$state) {
             curLt = new BMap.Point(sw.lng,ne.lat);
             curRt = new BMap.Point(e.point.lng,ne.lat);
             curRb = new BMap.Point(e.point.lng,e.point.lat);
+            lbMarker.setPosition(curLb);
+            ltMarker.setPosition(curLt);
+            rtMarker.setPosition(curRt);
         }
         pathArr = [curLb,curLt,curRt,curRb];
         drawPath(pathArr);
