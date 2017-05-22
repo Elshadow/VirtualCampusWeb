@@ -27,7 +27,7 @@ app.controller('indexBdCtrl', function ($scope,$auth,Account,$state) {
 
     var chinaLat = 37.899050079360935;
     var chinaLng = 102.83203125;
-    var map = new BMap.Map("map");  // 创建地图实例  
+    var map = new BMap.Map("map", {enableMapClick: false});  // 创建地图实例  
     var point = new BMap.Point(chinaLng, chinaLat); // 创建点坐标
     // map.setMapStyle({style:'grassgreen'});
     map.centerAndZoom(point, 5);   // 初始化地图，设置中心点坐标和地图级别
