@@ -775,10 +775,10 @@ app.controller('indexBdCtrl', function ($scope,$auth,Account,$state) {
                 }
                 // console.log(lastOverlay.po)
                 // 0 1 2 3对应左上 右上 右下 左下四个顶点经纬度
-                var northWest = lastOverlay.po[0];
-                var northEast = lastOverlay.po[1];
-                var southEast = lastOverlay.po[2];
-                var southWest = lastOverlay.po[3];
+                var northWest = lastOverlay.ro[0];
+                var northEast = lastOverlay.ro[1];
+                var southEast = lastOverlay.ro[2];
+                var southWest = lastOverlay.ro[3];
                 var params = {
                     schoolName: $scope.schoolName,
                     _id: $scope.id,
