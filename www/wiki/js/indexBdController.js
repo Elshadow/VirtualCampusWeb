@@ -775,21 +775,21 @@ app.controller('indexBdCtrl', function ($scope,$auth,Account,$state) {
                 }
                 // console.log(lastOverlay.po)
                 // 0 1 2 3对应左上 右上 右下 左下四个顶点经纬度
-                var northWest = lastOverlay.ro[0];
-                var northEast = lastOverlay.ro[1];
-                var southEast = lastOverlay.ro[2];
-                var southWest = lastOverlay.ro[3];
+                // var northWest = lastOverlay.getBounds().getNorthWest();
+                var northEast = lastOverlay.getBounds().getNorthEast();
+                // var southEast = lastOverlay.getBounds().getSouthEast();
+                var southWest = lastOverlay.getBounds().getSouthWest();
                 var params = {
                     schoolName: $scope.schoolName,
                     _id: $scope.id,
-                    northWestLat: northWest.lat,
-                    norhtWestLng: northWest.lng,
+                    northWestLat: northEast.lat,
+                    norhtWestLng: southWest.lng,
                     northEastLat: northEast.lat,
                     northEastLng: northEast.lng,
                     southWestLat: southWest.lat,
                     southWestLng: southWest.lng,
-                    southEastLat: southEast.lat,
-                    southEastLng: southEast.lng,
+                    southEastLat: southWest.lat,
+                    southEastLng: northEast.lng,
                 }
                 util.http("put", config.apiUrlPrefix + 'school', params, function (data) {
                     getSchool();
